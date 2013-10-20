@@ -6,6 +6,8 @@
 extern SCARD_IO_REQUEST pioSendPci;
 
 struct token_interface {
+	char *name;
+	int (*parse_option)(char *key, char *val);
 	DWORD (*check_atr_hb)(LPTSTR str, DWORD size);
 	DWORD (*prologue)(SCARDHANDLE hCard,LPTSTR envp[]);
 	DWORD (*trancieve)(SCARDHANDLE hCard,LPTSTR envp[],

@@ -1,4 +1,6 @@
+#include <stdio.h>
 #include <string.h>
+#include <alloca.h>
 #include "token.h"
 #include <reader.h>
 
@@ -96,4 +98,27 @@ free_out:
 
 char *pcsc_errstr(long err) {
 	return pcsc_stringify_error(err);
+}
+
+int pcsc_option(char *option)
+{
+	char *name, *key, *val;
+	int i, rc = -1;
+	struct token_interface *type;
+
+	name=(char *)alloca(strlen(option)+1);
+	strcpy(name, option);
+	if ((key = strchr(name, ':'))) *(key++) = '\0';
+	else return -1;
+	if ((val = strchr(key, '='))) *(val++) = '\0';
+	else return -1;
+	if (*val == '\0') return -1;
+	for (i = 0; types[i]; i++) {
+		type = types[i];
+		if (!strcmp(type->name,name)) {
+			rc = type->parse_option(key, val);
+			break;
+		}
+	}
+	return rc;
 }

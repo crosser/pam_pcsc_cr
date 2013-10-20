@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 #include <alloca.h>
 
@@ -7,7 +8,27 @@
 
 static const BYTE selcmd[] = {0x00, 0xA4, 0x04, 0x00, 0x07, 0xA0,
 				0x00, 0x00, 0x05, 0x27, 0x20, 0x01, 0x00};
-static const BYTE cr_cmd[] = {0x00, 0x01, 0x38, 0x00};
+static const BYTE cr_cmd[] = {0x00, 0x01, 0xff, 0x00};
+
+static BYTE cr_for_slot[3] = {0xff, 0x30, 0x38};
+
+static int slot;
+
+static int ykn_parse_option(char *key, char *val)
+{
+	if (!strcmp(key, "slot")) {
+		if (!strcmp(val, "1")) {
+			slot = 1;
+		} else if (!strcmp(val, "2")) {
+			slot = 2;
+		} else {
+			return -1;
+		}
+	} else {
+		return -1;
+	}
+	return 0;
+}
 
 static DWORD ykn_check_atr_hb(LPTSTR str, DWORD size)
 {
@@ -39,6 +60,7 @@ static DWORD ykn_trancieve(SCARDHANDLE hCard,LPTSTR envp[],
 	BYTE *rbuf = alloca(rsize);
 	BYTE *sbuf = alloca(sendsize + 6);
 	memcpy(sbuf, cr_cmd, sizeof(cr_cmd));
+	sbuf[2] = cr_for_slot[slot];
 	sbuf[sizeof(cr_cmd)] = sendsize;
 	memcpy(sbuf + sizeof(cr_cmd) + 1, send, sendsize);
 	sbuf[sendsize + 5] = rsize;
@@ -58,6 +80,8 @@ static DWORD ykn_epilogue(SCARDHANDLE hCard,LPTSTR envp[])
 }
 
 struct token_interface ykneo_interface = {
+	.name		= "ykneo",
+	.parse_option	= ykn_parse_option,
 	.check_atr_hb	= ykn_check_atr_hb,
 	.prologue	= ykn_prologue,
 	.trancieve	= ykn_trancieve,
