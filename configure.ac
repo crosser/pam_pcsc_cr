@@ -47,7 +47,7 @@ AS_IF([test "x$OPENSSL_CFLAGS" != "x" -o "x$OPENSSL_LIBS" != "x" ], [
 CPPFLAGS="$OPENSSL_CFLAGS $CPPFLAGS"
 LIBS="$OPENSSL_LIBS $LIBS"
 
-AC_ARG_ENABLE(enable_tomcrypt,
+AC_ARG_ENABLE(tomcrypt,
 	[  --enable-tomcrypt       use libtomcrypt even when openssl present])
 
 AS_IF([test "x$use_openssl" != "xyes" -o "x$enable_tomcrypt" = "xyes"], [
