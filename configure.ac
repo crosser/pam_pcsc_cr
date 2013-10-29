@@ -19,27 +19,31 @@ AC_PROG_INSTALL
 AM_PROG_LIBTOOL
 PKG_PROG_PKG_CONFIG
 
-PKG_CHECK_MODULES([PCSC], [pcsclite])
-AC_ARG_WITH(pcsc-include-path,
-	[  --with-pcsc-include-path=PATH path to pcsclite includes],
+PKG_CHECK_MODULES([PCSC], [libpcsclite])
+AC_ARG_WITH(pcsclite-include-path,
+	[  --with-pcsclite-include-path=PATH path to pcsclite includes],
 	[PCSC_CFLAGS="-I $withval"],
 	[])
-AC_ARG_WITH(pcsc-lib-path,
-	[  --with-pcsc-lib-path=PATH path to pcsclite libs],
+AC_ARG_WITH(pcsclite-lib-path,
+	[  --with-pcsclite-lib-path=PATH path to pcsclite libs],
 	[PCSC_LIBS="-L $withval -lpcsclite"],
 	[])
 
 AC_SUBST(PCSC_LIBS)
 AC_SUBST(PCSC_CFLAGS)
+CFLAGS="$PCSC_CFLAGS $CFLAGS"
+LIBS="$PCSC_LIBS $LIBS"
+
+AC_SUBST(CRYPTO_OBJS)
 
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_TIME
 
-AC_CHECK_LIB(libpcsclite, SCardEstablishContext)
-if test x$ac_cv_lib_SCardEstablishContext != xyes; then
-	AC_MSG_ERROR([Cannot find usable libpcsclite])
-fi
+AC_CHECK_HEADERS([winscard.h reader.h], [],
+  [AC_MSG_ERROR([[pcsclite headers not found]])])
+AC_CHECK_LIB([pcsclite], [SCardEstablishContext], [],
+  [AC_MSG_ERROR([[pcsclite library not useable]])])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

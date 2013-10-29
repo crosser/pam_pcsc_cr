@@ -30,7 +30,7 @@ static int ykn_parse_option(char *key, char *val)
 	return 0;
 }
 
-static DWORD ykn_check_atr_hb(LPTSTR str, DWORD size)
+static DWORD ykn_check_atr_hb(BYTE *str, DWORD size)
 {
 	if (size < strlen(NAMEPFX)) return SCARD_W_UNSUPPORTED_CARD;
 	if (memcmp(str, NAMEPFX, strlen(NAMEPFX)))
@@ -53,7 +53,7 @@ static DWORD ykn_prologue(SCARDHANDLE hCard,LPTSTR envp[])
 }
 
 static DWORD ykn_trancieve(SCARDHANDLE hCard,LPTSTR envp[],
-	LPTSTR send, DWORD sendsize, LPTSTR recv, LPDWORD recvsize_p)
+	LPTSTR send, DWORD sendsize, BYTE *recv, LPDWORD recvsize_p)
 {
 	DWORD rc;
 	DWORD rsize = *recvsize_p + 2;

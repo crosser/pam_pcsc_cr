@@ -7,6 +7,8 @@ LIBS = @LIBS@
 pamlibdir = @pamlibdir@
 
 noinst_HEADERS = pcsc_cr.h token.h
+noinst_PROGRAMS = test_cr
+test_cr_DEPENDENCIES = pam_pcsc_cr.la
 
 lib_LTLIBRARIES = pam_pcsc_cr.la
 EXTRA_pam_pcsc_cr_la_SOURCES = ossl_crypto.c tom_prypto.c

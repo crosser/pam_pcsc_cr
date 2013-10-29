@@ -13,7 +13,7 @@ static struct token_interface *types[] = {
 
 SCARD_IO_REQUEST pioSendPci;
 
-static LONG find_hb(LPTSTR atr, DWORD atrsize, LPTSTR *hb, LPDWORD hbsize)
+static LONG find_hb(BYTE *atr, DWORD atrsize, BYTE **hb, LPDWORD hbsize)
 {
 	int i, j, cont;
 	if (atrsize < 2) return SCARD_W_UNSUPPORTED_CARD;
@@ -44,7 +44,7 @@ long pcsc_cr(unsigned char *chal, int csize, unsigned char *resp, int *rsize)
 	DWORD nrdrs = SCARD_AUTOALLOCATE, activeproto;
 	BYTE atr[33];
 	DWORD atrsize;
-	LPTSTR hb;
+	BYTE *hb;
 	DWORD hbsize;
 	DWORD lrsize;
 	int i;
