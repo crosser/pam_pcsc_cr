@@ -29,11 +29,51 @@ AC_ARG_WITH(pcsclite-lib-path,
 	[PCSC_LIBS="-L $withval -lpcsclite"],
 	[])
 
-AC_SUBST(PCSC_LIBS)
-AC_SUBST(PCSC_CFLAGS)
-CFLAGS="$PCSC_CFLAGS $CFLAGS"
+CPPFLAGS="$PCSC_CFLAGS $CPPFLAGS"
 LIBS="$PCSC_LIBS $LIBS"
 
+PKG_CHECK_MODULES([OPENSSL], [libcrypto], [], [:])
+AC_ARG_WITH(openssl-include-path,
+	[  --with-openssl-include-path=PATH path to openssl includes],
+	[OPENSSL_CFLAGS="-I $withval"],
+	[])
+AC_ARG_WITH(openssl-lib-path,
+	[  --with-openssl-lib-path=PATH path to openssl libs],
+	[OPENSSL_LIBS="-L $withval -lcrypto"],
+	[])
+AS_IF([test "x$OPENSSL_CFLAGS" != "x" -o "x$OPENSSL_LIBS" != "x" ], [
+  use_openssl=yes
+])
+CPPFLAGS="$OPENSSL_CFLAGS $CPPFLAGS"
+LIBS="$OPENSSL_LIBS $LIBS"
+
+AS_IF([test "x$use_openssl" != "xyes"], [
+  PKG_CHECK_MODULES([TOMCRYPT], [libtomcrypt], [], [:])
+])
+AC_ARG_WITH(libtomcrypt-include-path,
+	[  --with-libtomcrypt-include-path=PATH path to libtomcrypt includes],
+	[TOMCRYPT_CFLAGS="-I $withval"],
+	[])
+AC_ARG_WITH(libtomcrypt-lib-path,
+	[  --with-libtomcrypt-lib-path=PATH path to libtomcrypt libs],
+	[TOMCRYPT_LIBS="-L $withval -ltomcrypt"],
+	[])
+AS_IF([test "x$TOMCRYPT_CFLAGS" != "x" -o "x$TOMCRYPT_LIBS" != "x" ], [
+  use_tomcrypt=yes
+])
+CPPFLAGS="$TOMCRYPT_CFLAGS $CPPFLAGS"
+LIBS="$TOMCRYPT_LIBS $LIBS"
+
+AS_IF([test "x$use_openssl" != "xyes" -a "x$use_tomcrypt" != "xyes"], [
+  AC_MSG_ERROR([[Neither openssl nor tomcrypt libraries present]])
+])
+
+AS_IF([test "x$use_openssl" = "xyes"], [
+  CRYPTO_OBJS+=ossl_crypto.lo
+])
+AS_IF([test "x$use_tomcrypt" = "xyes"], [
+  CRYPTO_OBJS+=tom_crypto.lo
+])
 AC_SUBST(CRYPTO_OBJS)
 
 dnl Checks for header files.

@@ -3,22 +3,21 @@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 
-LIBS = @LIBS@
-pamlibdir = @pamlibdir@
-
 noinst_HEADERS = pcsc_cr.h token.h
-noinst_PROGRAMS = test_cr
-test_cr_DEPENDENCIES = pam_pcsc_cr.la
+
+EXTRA_LTLIBRARIES = libpcsc_cr.la
+libpcsc_cr_la_SOURCES = crypto.c pcsc_cr.c ykneo.c
+EXTRA_libpcsc_cr_la_SOURCES = ossl_crypto.c tom_prypto.c
+libpcsc_cr_la_LIBADD = @CRYPTO_OBJS@
+libpcsc_cr_la_DEPENDENCIES = @CRYPTO_OBJS@
 
 lib_LTLIBRARIES = pam_pcsc_cr.la
-EXTRA_pam_pcsc_cr_la_SOURCES = ossl_crypto.c tom_prypto.c
-pam_pcsc_cr_la_SOURCES = crypto.c pcsc_cr.c ykneo.c
 pam_pcsc_cr_la_LDFLAGS = -module -avoid-version
-pam_pcsc_cr_la_LIBADD = @CRYPTO_OBJS@
-pam_pcsc_cr_la_DEPENDENCIES = @CRYPTO_OBJS@
+pam_pcsc_cr_la_LIBADD = libpcsc_cr.la
+
+check_PROGRAMS = test_cr
+test_cr_LDADD = libpcsc_cr.la
 
 EXTRA_DIST = autogen.sh
 
 TESTS = test_cr
-
-CLEANFILES = test_cr
