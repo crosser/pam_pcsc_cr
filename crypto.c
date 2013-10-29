@@ -1,30 +1,28 @@
-#include <openssl/evp.h>
-#include <openssl/hmac.h>
+#include "crypto.h"
+#include "crypto_if.h"
 
-//int main()
-//{
-//    EVP_CIPHER_CTX ctx;
-//    unsigned char key[32] = {0};
-//    unsigned char iv[16] = {0};
-//    unsigned char in[16] = {0};
-//    unsigned char out[32]; /* at least one block longer than in[] */
-//    int outlen1, outlen2;
-//
-//    EVP_EncryptInit(&ctx, EVP_aes_256_cbc(), key, iv);
-//    EVP_EncryptUpdate(&ctx, out, &outlen1, in, sizeof(in));
-//    EVP_EncryptFinal(&ctx, out + outlen1, &outlen2);
-//
-//    printf("ciphertext length: %d\n", outlen1 + outlen2);
-//
-//    return 0;
-//}
+extern struct crypto_interface ossl_crypto_if;
+extern struct crypto_interface tom_crypto_if;
 
-// result = HMAC(EVP_sha256(), key, 999, data, 888, NULL, NULL);
-//               EVP_MD *
+static struct crypto_interface *active = &ossl_crypto_if;
 
-// HMAC_CTX hctx;
-// HMAC_CTX_init(&hctx);
-// if (HMAC_Init(&hctx, key, keylen, EVP_sha1())) success;
-// if (HMAC_Update(&hctx, data, datalen)) success;
-// if (HMAC_Final(&hctx, &digest, &digestlen)) success
-// HMAC_CTX_cleanup(&hctx);
+int encrypt(void *pt, int ptlen, void *key, int keylen, void *ct, int *ctlen)
+{
+	return active->encrypt(pt, ptlen, key, keylen, ct, ctlen);
+}
+
+int decrypt(void *ct, int ctlen, void *key, int keylen, void *pt, int *ptlen)
+{
+	return active->decrypt(ct, ctlen, key, keylen, pt, ptlen);
+}
+
+int hash(void *pt, int ptlen, void *tag, int *taglen)
+{
+	return active->hash(pt, ptlen, tag, taglen);
+}
+
+int hmac(void *pt, int ptlen, void *key, int keylen, void *tag, int *taglen)
+{
+	return active->hmac(pt, ptlen, key, keylen, tag, taglen);
+}
+

@@ -3,11 +3,11 @@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 
-noinst_HEADERS = pcsc_cr.h token.h
+noinst_HEADERS = pcsc_cr.h token.h crypto_if.h crypto.h
 
 EXTRA_LTLIBRARIES = libpcsc_cr.la
 libpcsc_cr_la_SOURCES = crypto.c pcsc_cr.c ykneo.c
-EXTRA_libpcsc_cr_la_SOURCES = ossl_crypto.c tom_prypto.c
+EXTRA_libpcsc_cr_la_SOURCES = ossl_crypto.c tom_crypto.c
 libpcsc_cr_la_LIBADD = @CRYPTO_OBJS@
 libpcsc_cr_la_DEPENDENCIES = @CRYPTO_OBJS@
 
