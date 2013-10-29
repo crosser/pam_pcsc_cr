@@ -47,7 +47,10 @@ AS_IF([test "x$OPENSSL_CFLAGS" != "x" -o "x$OPENSSL_LIBS" != "x" ], [
 CPPFLAGS="$OPENSSL_CFLAGS $CPPFLAGS"
 LIBS="$OPENSSL_LIBS $LIBS"
 
-AS_IF([test "x$use_openssl" != "xyes"], [
+AC_ARG_ENABLE(enable_tomcrypt,
+	[  --enable-tomcrypt       use libtomcrypt even when openssl present])
+
+AS_IF([test "x$use_openssl" != "xyes" -o "x$enable_tomcrypt" = "xyes"], [
   PKG_CHECK_MODULES([TOMCRYPT], [libtomcrypt], [], [:])
 ])
 AC_ARG_WITH(libtomcrypt-include-path,
@@ -69,10 +72,10 @@ AS_IF([test "x$use_openssl" != "xyes" -a "x$use_tomcrypt" != "xyes"], [
 ])
 
 AS_IF([test "x$use_openssl" = "xyes"], [
-  CRYPTO_OBJS+=ossl_crypto.lo
+  CRYPTO_OBJS+=" ossl_crypto.lo"
 ])
 AS_IF([test "x$use_tomcrypt" = "xyes"], [
-  CRYPTO_OBJS+=tom_crypto.lo
+  CRYPTO_OBJS+=" tom_crypto.lo"
 ])
 AC_SUBST(CRYPTO_OBJS)
 
