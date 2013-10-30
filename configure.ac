@@ -9,7 +9,7 @@ AC_LANG_C
 AC_PROG_CC
 
 if test "X$CC" = "Xgcc"; then
-  CFLAGS="$CFLAGS -Wall -g"
+  CFLAGS="$CFLAGS -Wall"
 fi
 
 AC_PROG_MAKE_SET
