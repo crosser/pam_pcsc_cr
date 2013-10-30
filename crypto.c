@@ -1,3 +1,6 @@
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 #include <assert.h>
 #include "crypto.h"
 #include "crypto_if.h"
@@ -25,6 +28,12 @@ int select_crypto_if(int ifno)
 	return 0;
 }
 
+const char *if_name(int ifno)
+{
+	if (ifno < 0 || ifno > MAX_IF) return "invalid index";
+	return ifs[ifno]->name;
+}
+
 static unsigned char iv[16] = {0};
 
 unsigned long encrypt(void *key, int keylen, void *pt, void *ct, int tlen)
@@ -47,7 +56,6 @@ unsigned long hash(void *pt, int tlen, void *tag, int *taglen)
 
 unsigned long hmac(void *key, int keylen, void *pt, int tlen, void *tag, int *taglen)
 {
-	assert(keylen == 20);
 	assert(*taglen == 20);
 	return ifs[which]->hmac(key, keylen, pt, tlen, tag, taglen);
 }

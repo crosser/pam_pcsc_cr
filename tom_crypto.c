@@ -1,3 +1,6 @@
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 #include <tomcrypt.h>
 
 #include "crypto_if.h"
@@ -50,7 +53,6 @@ static unsigned long tom_hmac(void *key, int keylen,
 	int index, rc;
 	unsigned long ltaglen = *taglen;
 
-	if (keylen != 20) return CRYPT_INVALID_KEYSIZE;
 	if ((index = register_hash(&sha1_desc)) == -1)
 		return CRYPT_INVALID_HASH;
 	rc = hmac_memory(index, key, keylen, pt, tlen, tag, &ltaglen);
