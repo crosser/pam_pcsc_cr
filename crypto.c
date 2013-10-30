@@ -1,28 +1,58 @@
+#include <assert.h>
 #include "crypto.h"
 #include "crypto_if.h"
 
 extern struct crypto_interface ossl_crypto_if;
 extern struct crypto_interface tom_crypto_if;
 
-static struct crypto_interface *active = &ossl_crypto_if;
+static struct crypto_interface *ifs[] = {
+#ifdef HAVE_OPENSSL
+	&ossl_crypto_if,
+#endif
+#ifdef HAVE_TOMCRYPT
+	&tom_crypto_if,
+#endif
+	(void*)0,
+};
+#define MAX_IF (sizeof(ifs)/sizeof(struct crypto_interface *)-2)
 
-int encrypt(void *pt, int ptlen, void *key, int keylen, void *ct, int *ctlen)
+static int which = 0;
+
+int select_crypto_if(int ifno)
 {
-	return active->encrypt(pt, ptlen, key, keylen, ct, ctlen);
+	if (ifno < 0 || ifno > MAX_IF) return -1;
+	which = ifno;
+	return 0;
 }
 
-int decrypt(void *ct, int ctlen, void *key, int keylen, void *pt, int *ptlen)
+static unsigned char iv[16] = {0};
+
+unsigned long encrypt(void *key, int keylen, void *pt, void *ct, int tlen)
 {
-	return active->decrypt(ct, ctlen, key, keylen, pt, ptlen);
+	assert(keylen == 16);
+	return ifs[which]->encrypt(key, keylen, iv, pt, ct, tlen);
 }
 
-int hash(void *pt, int ptlen, void *tag, int *taglen)
+unsigned long decrypt(void *key, int keylen, void *ct, void *pt, int tlen)
 {
-	return active->hash(pt, ptlen, tag, taglen);
+	assert(keylen == 16);
+	return ifs[which]->decrypt(key, keylen, iv, ct, pt, tlen);
 }
 
-int hmac(void *pt, int ptlen, void *key, int keylen, void *tag, int *taglen)
+unsigned long hash(void *pt, int tlen, void *tag, int *taglen)
 {
-	return active->hmac(pt, ptlen, key, keylen, tag, taglen);
+	assert(*taglen == 20);
+	return ifs[which]->hash(pt, tlen, tag, taglen);
 }
 
+unsigned long hmac(void *key, int keylen, void *pt, int tlen, void *tag, int *taglen)
+{
+	assert(keylen == 20);
+	assert(*taglen == 20);
+	return ifs[which]->hmac(key, keylen, pt, tlen, tag, taglen);
+}
+
+const char *crypto_errstr(unsigned long err)
+{
+	return ifs[which]->errstr(err);
+}

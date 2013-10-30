@@ -78,17 +78,17 @@ long pcsc_cr(unsigned char *chal, int csize, unsigned char *resp, int *rsize)
 			if (rc == 0) break;
 		}
 		if (rc) goto disconnect;
-		rc = type->prologue(hCard, NULL);
+		rc = type->prologue(hCard);
 		if (rc == 0) break;
 	disconnect:
 		(void)SCardDisconnect(hCard, SCARD_LEAVE_CARD);
 	}
 	if (rc) goto free_out;
 	lrsize = *rsize;
-	rc = type->trancieve(hCard, NULL, chal, csize, resp, &lrsize);
+	rc = type->trancieve(hCard, chal, csize, resp, &lrsize);
 	if (rc) goto disc_free_out;
 	*rsize = lrsize;
-	rc = type->epilogue(hCard, NULL);
+	rc = type->epilogue(hCard);
 disc_free_out:
 	(void)SCardDisconnect(hCard, SCARD_EJECT_CARD);
 free_out:

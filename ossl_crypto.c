@@ -1,48 +1,77 @@
+#include <openssl/err.h>
+#include <openssl/sha.h>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 
 #include "crypto_if.h"
 
-static int ossl_encrypt(void *pt, int ptlen, void *key, int keylen,
-			void *ct, int *ctlen)
+static unsigned long ossl_encrypt(void *key, int keylen, void *iv,
+			void *pt, void *ct, int tlen)
 {
-    EVP_CIPHER_CTX ctx;
-    unsigned char iv[16] = {0};
-    int outlen1, outlen2;
+	EVP_CIPHER_CTX ctx;
+	int outlen1, outlen2;
+	unsigned char hkey[16];
 
-    EVP_EncryptInit(&ctx, EVP_aes_256_cbc(), key, iv);
-    EVP_EncryptUpdate(&ctx, ct, &outlen1, pt, ptlen);
-    EVP_EncryptFinal(&ctx, ct + outlen1, &outlen2);
-    if (outlen1 + outlen2 > *ctlen) return -1;
-    *ctlen = outlen1 + outlen2;
-
-    return 0;
+	if (EVP_BytesToKey(EVP_aes_128_cbc(), EVP_sha1(),
+			NULL, key, keylen, 5, hkey, NULL) != 16) return 1UL;
+	if (!EVP_EncryptInit(&ctx, EVP_aes_128_cbc(), hkey, iv))
+		return ERR_get_error();
+	if (!EVP_EncryptUpdate(&ctx, ct, &outlen1, pt, tlen))
+		return ERR_get_error();
+	if (!EVP_EncryptFinal(&ctx, ct + outlen1, &outlen2))
+		return ERR_get_error();
+	if (outlen1 + outlen2 != tlen) return 1UL;
+	return 0UL;
 }
 
-static int ossl_decrypt()
+static unsigned long ossl_decrypt(void *key, int keylen, void *iv,
+			void *ct, void *pt, int tlen)
 {
-	return 0;
+	EVP_CIPHER_CTX ctx;
+	int outlen1, outlen2;
+	unsigned char hkey[16];
+
+	if (EVP_BytesToKey(EVP_aes_128_cbc(), EVP_sha1(),
+			NULL, key, keylen, 5, hkey, NULL) != 16) return 1UL;
+	if (!EVP_DecryptInit(&ctx, EVP_aes_128_cbc(), hkey, iv))
+		return ERR_get_error();
+	if (!EVP_DecryptUpdate(&ctx, ct, &outlen1, pt, tlen))
+		return ERR_get_error();
+	if (!EVP_DecryptFinal(&ctx, ct + outlen1, &outlen2))
+		return ERR_get_error();
+	if (outlen1 + outlen2 != tlen) return 1UL;
+	return 0UL;
 }
 
-static int ossl_hash()
+static unsigned long ossl_hash(void *pt, int tlen, void *tag, int *taglen)
 {
-	return 0;
+	SHA_CTX sctx;
+
+	if (!SHA1_Init(&sctx)) return ERR_get_error();
+	if (!SHA1_Update(&sctx, pt, tlen)) return ERR_get_error();
+	if (!SHA1_Final(tag, &sctx)) return ERR_get_error();
+	*taglen = 160;
+	return 0UL;
 }
 
-static int ossl_hmac()
+static unsigned long ossl_hmac(void *pt, int tlen, void *key, int keylen,
+			void *tag, int *taglen)
 {
-	return 0;
+	HMAC_CTX hctx;
+
+	HMAC_CTX_init(&hctx);
+	if (!HMAC_Init(&hctx, key, keylen, EVP_sha1())) return ERR_get_error();
+	if (!HMAC_Update(&hctx, pt, tlen)) return ERR_get_error();
+	if (!HMAC_Final(&hctx, tag, (unsigned int *)taglen))
+		return ERR_get_error();
+	HMAC_CTX_cleanup(&hctx);
+	return 0UL;
 }
 
-// result = HMAC(EVP_sha256(), key, 999, data, 888, NULL, NULL);
-//               EVP_MD *
-
-// HMAC_CTX hctx;
-// HMAC_CTX_init(&hctx);
-// if (HMAC_Init(&hctx, key, keylen, EVP_sha1())) success;
-// if (HMAC_Update(&hctx, data, datalen)) success;
-// if (HMAC_Final(&hctx, &digest, &digestlen)) success
-// HMAC_CTX_cleanup(&hctx);
+static const char *ossl_errstr(unsigned long err)
+{
+	return ERR_error_string(err, NULL);
+}
 
 struct crypto_interface ossl_crypto_if = {
 	.name		= "openssl",
@@ -50,4 +79,5 @@ struct crypto_interface ossl_crypto_if = {
 	.decrypt	= ossl_decrypt,
 	.hash		= ossl_hash,
 	.hmac		= ossl_hmac,
+	.errstr		= ossl_errstr,
 };

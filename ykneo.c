@@ -38,7 +38,7 @@ static DWORD ykn_check_atr_hb(BYTE *str, DWORD size)
 	return SCARD_S_SUCCESS;
 }
 
-static DWORD ykn_prologue(SCARDHANDLE hCard,LPTSTR envp[])
+static DWORD ykn_prologue(SCARDHANDLE hCard)
 {
 	BYTE buf[258];
 	DWORD rsize = sizeof(buf);
@@ -52,8 +52,8 @@ static DWORD ykn_prologue(SCARDHANDLE hCard,LPTSTR envp[])
 	else return SCARD_W_CARD_NOT_AUTHENTICATED;
 }
 
-static DWORD ykn_trancieve(SCARDHANDLE hCard,LPTSTR envp[],
-	LPTSTR send, DWORD sendsize, BYTE *recv, LPDWORD recvsize_p)
+static DWORD ykn_trancieve(SCARDHANDLE hCard,
+	BYTE *send, DWORD sendsize, BYTE *recv, LPDWORD recvsize_p)
 {
 	DWORD rc;
 	DWORD rsize = *recvsize_p + 2;
@@ -74,7 +74,7 @@ static DWORD ykn_trancieve(SCARDHANDLE hCard,LPTSTR envp[],
 	return SCARD_S_SUCCESS;
 }
 
-static DWORD ykn_epilogue(SCARDHANDLE hCard,LPTSTR envp[])
+static DWORD ykn_epilogue(SCARDHANDLE hCard)
 {
 	return SCardEndTransaction(hCard, SCARD_LEAVE_CARD);
 }

@@ -73,9 +73,11 @@ AS_IF([test "x$use_openssl" != "xyes" -a "x$use_tomcrypt" != "xyes"], [
 
 AS_IF([test "x$use_openssl" = "xyes"], [
   CRYPTO_OBJS+=" ossl_crypto.lo"
+  AC_DEFINE([HAVE_OPENSSL], [1], [Use openssl libcrypto])
 ])
 AS_IF([test "x$use_tomcrypt" = "xyes"], [
   CRYPTO_OBJS+=" tom_crypto.lo"
+  AC_DEFINE([HAVE_TOMCRYPT], [1], [Use libtomcrypt])
 ])
 AC_SUBST(CRYPTO_OBJS)
 

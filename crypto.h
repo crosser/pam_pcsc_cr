@@ -1,9 +1,12 @@
 #ifndef _CRYPTO_H
 #define _CRYPTO_H
 
-int encrypt(void *pt, int ptlen, void *key, int keylen, void *ct, int *ctlen);
-int decrypt(void *ct, int ctlen, void *key, int keylen, void *pt, int *ptlen);
-int hash(void *pt, int ptlen, void *tag, int *taglen);
-int hmac(void *pt, int ptlen, void *key, int keylen, void *tag, int *taglen);
+int select_crypto_if(int ifno);
+unsigned long encrypt(void *key, int keylen, void *pt, void *ct, int tlen);
+unsigned long decrypt(void *key, int keylen, void *ct, void *pt, int tlen);
+unsigned long hash(void *pt, int tlen, void *tag, int *taglen);
+unsigned long hmac(void *key, int keylen, void *pt, int tlen,
+			void *tag, int *taglen);
+const char *crypto_errstr(unsigned long err);
 
 #endif
