@@ -2,7 +2,7 @@
 #define _CRYPTO_IF_H
 
 struct crypto_interface {
-	char *name;
+	const char *(*init)(void);
 	unsigned long (*encrypt)(void *key, int keylen, void *iv,
 				void *pt, void *ct, int tlen);
 	unsigned long (*decrypt)(void *key, int keylen, void *iv,

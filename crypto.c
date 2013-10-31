@@ -28,10 +28,10 @@ int select_crypto_if(int ifno)
 	return 0;
 }
 
-const char *if_name(int ifno)
+const char *crypto_init(int ifno)
 {
-	if (ifno < 0 || ifno > MAX_IF) return "invalid index";
-	return ifs[ifno]->name;
+	if (ifno < 0 || ifno > MAX_IF) return (const char *)0;
+	return ifs[ifno]->init();
 }
 
 static unsigned char iv[16] = {0};

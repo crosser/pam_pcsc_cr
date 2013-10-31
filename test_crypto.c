@@ -29,13 +29,14 @@ int test_enc_dec(int iface1, int iface2)
 	printh(pt);
 	printh(key);
 	if (select_crypto_if(iface1)) return 1;
+	memset(ct, 0xfe, sizeof(ct));
 	if ((err = encrypt(key, sizeof(key), pt, ct, sizeof(pt)))) {
 		printf("encrypt error: %s\n", crypto_errstr(err));
 		return 1;
 	}
 	printh(ct);
 	if (select_crypto_if(iface2)) return 1;
-	if ((err = decrypt(key, sizeof(key), ct, re, sizeof(ct)))) {
+	if ((err = decrypt(key, sizeof(key), ct, re, sizeof(re)))) {
 		printf("decrypt error: %s\n", crypto_errstr(err));
 		return 1;
 	}
@@ -101,10 +102,11 @@ int main(int argc, char *argv[])
 {
 	int rc, maxrc = 0;
 	int numifs, i, j;
+	const char *name;
 
-	for (numifs = 0; select_crypto_if(numifs) == 0; numifs++)
-		printf("%d: %s\n", numifs, if_name(numifs));
-	printf("Testing %d interfaces\n", numifs);
+	for (numifs = 0; (name = crypto_init(numifs)); numifs++)
+		printf("%d: %s\n", numifs, name);
+	printf("Testing %d interfaces\n\n", numifs);
 
 	for (i = 0; i < numifs; i++)
 		if ((rc = test_sha(i)) > maxrc) maxrc = rc;

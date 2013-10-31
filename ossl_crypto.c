@@ -8,14 +8,18 @@
 
 #include "crypto_if.h"
 
+static const char *ossl_init(void)
+{
+	ERR_load_crypto_strings();
+	return "openssl";
+}
+
 static unsigned long ossl_encrypt(void *key, int keylen, void *iv,
 			void *pt, void *ct, int tlen)
 {
 	EVP_CIPHER_CTX ctx;
 	int outlen1, outlen2;
 	unsigned char hkey[16];
-
-	ERR_load_crypto_strings(); /* FIXME */
 
 	if (EVP_BytesToKey(EVP_aes_128_cbc(), EVP_sha1(),
 			NULL, key, keylen, 5, hkey, NULL) != 16) return 1UL;
@@ -70,14 +74,9 @@ static unsigned long ossl_hash(void *pt, int tlen, void *tag, int *taglen)
 static unsigned long ossl_hmac(void *pt, int tlen, void *key, int keylen,
 			void *tag, int *taglen)
 {
-	HMAC_CTX hctx;
-
-	HMAC_CTX_init(&hctx);
-	if (!HMAC_Init_ex(&hctx, key, keylen, EVP_sha1(), NULL)) return ERR_get_error();
-	if (!HMAC_Update(&hctx, pt, tlen)) return ERR_get_error();
-	if (!HMAC_Final(&hctx, tag, (unsigned int *)taglen))
-		return ERR_get_error();
-	HMAC_CTX_cleanup(&hctx);
+	if (!HMAC(EVP_sha1(), key, keylen, pt, tlen,
+				tag, (unsigned int *)taglen))
+			return ERR_get_error();
 	return 0UL;
 }
 
@@ -87,7 +86,7 @@ static const char *ossl_errstr(unsigned long err)
 }
 
 struct crypto_interface ossl_crypto_if = {
-	.name		= "openssl",
+	.init		= ossl_init,
 	.encrypt	= ossl_encrypt,
 	.decrypt	= ossl_decrypt,
 	.hash		= ossl_hash,

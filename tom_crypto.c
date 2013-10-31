@@ -5,6 +5,12 @@
 
 #include "crypto_if.h"
 
+static const char *tom_init(void)
+{
+	/* nothing to initialize */
+	return "tomcrypt";
+}
+
 static unsigned long tom_encrypt(void *key, int keylen, void *iv,
 			void *pt, void *ct, int tlen)
 {
@@ -66,7 +72,7 @@ static const char *tom_errstr(unsigned long err)
 }
 
 struct crypto_interface tom_crypto_if = {
-	.name		= "tomcrypt",
+	.init		= tom_init,
 	.encrypt	= tom_encrypt,
 	.decrypt	= tom_decrypt,
 	.hash		= tom_hash,
