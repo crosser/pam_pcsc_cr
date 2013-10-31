@@ -15,7 +15,8 @@ static const BYTE cr_cmd[] = {0x00, 0x01, 0xff, 0x00};
 
 static BYTE cr_for_slot[3] = {0xff, 0x30, 0x38};
 
-static int slot;
+static int slot = 2;	/* second by default, people tend to leave */
+			/* the first with factory settings.        */
 
 static int ykn_parse_option(char *key, char *val)
 {
