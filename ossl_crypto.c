@@ -50,9 +50,21 @@ static unsigned long ossl_hash(void *pt, int tlen, void *tag, int *taglen)
 static unsigned long ossl_hmac(void *pt, int tlen, void *key, int keylen,
 			void *tag, int *taglen)
 {
-	if (!HMAC(EVP_sha1(), key, keylen, pt, tlen,
-				tag, (unsigned int *)taglen))
-			return ERR_get_error();
+#if 1
+	HMAC_CTX hctx;
+
+	HMAC_CTX_init(&hctx);
+	if (!HMAC_Init_ex(&hctx, key, keylen, EVP_sha1(), NULL))
+		return ERR_get_error();
+	if (!HMAC_Update(&hctx, pt, tlen)) return ERR_get_error();
+	if (!HMAC_Final(&hctx, tag, (unsigned int *)taglen))
+		return ERR_get_error();
+	HMAC_CTX_cleanup(&hctx);
+#else
+	if (HMAC(EVP_sha1(), key, keylen, pt, tlen,
+				tag, (unsigned int *)taglen) != tag)
+		return ERR_get_error();
+#endif
 	return 0UL;
 }
 
