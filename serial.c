@@ -8,6 +8,7 @@ int serial_init(serializer_t *srl, void *buffer, int size)
 {
 	srl->buffer = srl->cursor = buffer;
 	srl->bufsize = size;
+	return 0;
 }
 
 int serial_switch(serializer_t *srl, void *buffer, int size)

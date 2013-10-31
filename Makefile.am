@@ -15,10 +15,11 @@ lib_LTLIBRARIES = pam_pcsc_cr.la
 pam_pcsc_cr_la_LDFLAGS = -module -avoid-version
 pam_pcsc_cr_la_LIBADD = libpcsc_cr.la
 
-check_PROGRAMS = test_crypto test_chalresp
+check_PROGRAMS = test_serial test_crypto test_chalresp
+test_serial_LDADD = libpcsc_cr.la
 test_crypto_LDADD = libpcsc_cr.la
 test_chalresp_LDADD = libpcsc_cr.la
 
 EXTRA_DIST = autogen.sh
 
-TESTS = test_crypto test_chalresp
+TESTS = test_serial test_crypto test_chalresp
