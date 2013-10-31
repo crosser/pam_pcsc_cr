@@ -7,16 +7,17 @@
 #include <string.h>
 #include "pcsc_cr.h"
 
-unsigned char chal[] = {
-0x0f,0x65,0xd1,0x3a,0xfe,0xcb,0xc4,0xb9,0x52,0xb1,0x60,0xcf,0xe8,0x55,0x6a,0xdd,0xfb,0xef,0xf6,0x55,0x83,0x4c,0x8d,0xea,0x38,0xea,0x3b,0x26,0xf7,0x0a,0xe8,0x0d,0x31,0x38,0xee,0x16,0x5d,0xab,0x8b,0x7f,0xf0,0x1b,0xe3,0xbe,0xd8,0x4b,0x6e,0x44,0x42,0x8d,0x0f,0xc1,0x3b,0x23,0xea,0xfe,0xc0,0x68,0xc1,0x0f,0x60,0x6c,0xf4};
-
 static void usage(const char const *cmd)
 {
-	fprintf(stderr, "usage: %s [-o backend:name=value] ...\n", cmd);
+	fprintf(stderr,
+		"usage: %s [-o backend:name=value] ... \"challenge\"\n",
+		cmd);
 }
 
 int main(int argc, char *argv[])
 {
+	unsigned char chal[64];
+	int csize;
 	unsigned char rbuf[20];
 	int rsize = sizeof(rbuf);
 	int i;
@@ -37,9 +38,30 @@ int main(int argc, char *argv[])
 		usage(argv[0]);
 		exit(1);
 	}
+	if (optind != (argc - 1)) {
+		usage(argv[0]);
+		exit(1);
+	}
 
+	csize = strlen(argv[optind]);
+	if (csize > sizeof(chal)) {
+		fprintf(stderr, "Challenge longer than %d, cannot do that\n",
+			csize);
+		exit(1);
+	}
+#if 0
+	printf("\nIf the key is set to \"Jefe\" like this:\n"
+	"$ ykpersonalize -2 -o chal-resp -o chal-hmac -o hmac-lt64 \\\n"
+	"\t-a 4a65666500000000000000000000000000000000\n"
+	"and the challenge is \"what do ya want for nothing?\"\n"
+	"the result must be                  "
+	"\"ef fc df 6a e5 eb 2f a2 d2 74 16 d5 f1 84 df 9c 25 9a 7c 79\"\n");
+#endif
+	memset(chal, 0x00, sizeof(chal));
+	memcpy(chal, argv[optind], csize);
+	
 	memset(rbuf, 0xFE, sizeof(rbuf));
-	rc = pcsc_cr(chal, sizeof(chal), rbuf, &rsize);
+	rc = pcsc_cr(chal, csize, rbuf, &rsize);
 	printf("rc=%ld (%s) rsize=%d:", rc, pcsc_errstr(rc), rsize);
 	for (i = 0; i < rsize; i++) printf(" %02x", rbuf[i]);
 	printf("\n");

@@ -1,0 +1,20 @@
+Adapted from Yubico's white paper on full disk encryption:
+
+user record:
+	userid
+	seqno
+	encrypted blob:
+		data:
+			shared-secret
+			payload
+			crc
+		key:
+			hmac-sha1:
+				data:
+					userid
+					password
+					seqno
+				key:
+					shared-secret
+
+
