@@ -34,16 +34,20 @@ const char *crypto_init(int ifno)
 	return ifs[ifno]->init();
 }
 
-static unsigned char iv[16] = {0};
+#define INITIV {0}
 
 unsigned long encrypt(void *key, int keylen, void *pt, void *ct, int tlen)
 {
+	unsigned char iv[16] = INITIV;
+
 	assert(keylen == 16);
 	return ifs[which]->encrypt(key, keylen, iv, pt, ct, tlen);
 }
 
 unsigned long decrypt(void *key, int keylen, void *ct, void *pt, int tlen)
 {
+	unsigned char iv[16] = INITIV;
+
 	assert(keylen == 16);
 	return ifs[which]->decrypt(key, keylen, iv, ct, pt, tlen);
 }
