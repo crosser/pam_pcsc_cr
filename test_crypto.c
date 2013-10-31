@@ -36,6 +36,7 @@ int test_enc_dec(int iface1, int iface2)
 	}
 	printh(ct);
 	if (select_crypto_if(iface2)) return 1;
+	memset(re, 0xab, sizeof(re));
 	if ((err = decrypt(key, sizeof(key), ct, re, sizeof(re)))) {
 		printf("decrypt error: %s\n", crypto_errstr(err));
 		return 1;
@@ -58,7 +59,8 @@ int test_sha(int iface)
 		0xBA,0x3E,0x25,0x71,0x78,0x50,0xC2,0x6C,0x9C,0xD0,0xD8,0x9D};
 
 	if (select_crypto_if(iface)) return 1;
-	shalen = 20;
+	memset(sha1, 0, sizeof(sha1));
+	shalen = sizeof(sha1);
 	if ((err = hash(spt, sizeof(spt), sha1, &shalen))) {
 		printf("hash error: %s\n", crypto_errstr(err));
 		return 1;
@@ -83,7 +85,8 @@ int test_hmac(int iface)
 		0xd2,0x74,0x16,0xd5,0xf1,0x84,0xdf,0x9c,0x25,0x9a,0x7c,0x79};
 
 	if (select_crypto_if(iface)) return 1;
-	hmaclen = 20;
+	memset(hmac1, 0, sizeof(hmac1));
+	hmaclen = sizeof(hmac1);
 	if ((err = hmac(hkey, sizeof(hkey), hpt, sizeof(hpt),
 						hmac1, &hmaclen))) {
 		printf("hash error: %s\n", crypto_errstr(err));
