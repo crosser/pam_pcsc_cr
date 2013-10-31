@@ -47,7 +47,7 @@ static unsigned long ossl_hash(void *pt, int tlen, void *tag, int *taglen)
 	return 0UL;
 }
 
-static unsigned long ossl_hmac(void *pt, int tlen, void *key, int keylen,
+static unsigned long ossl_hmac(void *key, int keylen, void *pt, int tlen,
 			void *tag, int *taglen)
 {
 #if 1
