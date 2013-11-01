@@ -87,6 +87,15 @@ long pcsc_cr(unsigned char *chal, int csize, unsigned char *resp, int *rsize)
 		(void)SCardDisconnect(hCard, SCARD_LEAVE_CARD);
 	}
 	if (rc) goto free_out;
+#if 0
+	char serial[16];
+	memset(serial, 'z', sizeof(serial));
+	serial[sizeof(serial) - 1] - '\0';
+	lrsize = sizeof(serial);
+	rc = type->getserial(hCard, &serial, &lrsize);
+	if (rc) goto disc_free_out;
+	printf("Serial is %s\n", serial);
+#endif
 	lrsize = *rsize;
 	rc = type->trancieve(hCard, chal, csize, resp, &lrsize);
 	if (rc) goto disc_free_out;

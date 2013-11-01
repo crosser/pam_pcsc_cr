@@ -11,7 +11,7 @@
 
 static const BYTE selcmd[] = {0x00, 0xA4, 0x04, 0x00, 0x07, 0xA0,
 				0x00, 0x00, 0x05, 0x27, 0x20, 0x01, 0x00};
-static const BYTE cr_cmd[] = {0x00, 0x01, 0xff, 0x00};
+static const BYTE yk_cmd[] = {0x00, 0x01, 0xff, 0x00};
 
 static BYTE cr_for_slot[3] = {0xff, 0x30, 0x38};
 
@@ -56,6 +56,28 @@ static DWORD ykn_prologue(SCARDHANDLE hCard)
 	else return SCARD_W_CARD_NOT_AUTHENTICATED;
 }
 
+static DWORD ykn_getserial(SCARDHANDLE hCard, BYTE *recv, LPDWORD recvsize_p)
+{
+	DWORD rc;
+	BYTE rbuf[4 + 2];
+	DWORD rsize = sizeof(rbuf);
+	BYTE sbuf[sizeof(yk_cmd) + 1];
+	unsigned int serial;
+
+	memcpy(sbuf, yk_cmd, sizeof(yk_cmd));
+	sbuf[2] = 0x10; /* read serial */
+	sbuf[4] = rsize;
+	rc = SCardTransmit(hCard, &pioSendPci, sbuf, sizeof(sbuf),
+			NULL, rbuf, &rsize);
+	if (rc) return rc;
+	if ((rbuf[rsize-2] != 0x90) || (rbuf[rsize-1] != 0x00))
+		return SCARD_W_CARD_NOT_AUTHENTICATED;
+	serial = (rbuf[0]<<24) + (rbuf[1]<<16) + (rbuf[2]<<8) + (rbuf[3]);
+	rc = snprintf(recv, *recvsize_p, "%u", serial);
+	*recvsize_p = rc;
+	return SCARD_S_SUCCESS;
+}
+
 static DWORD ykn_trancieve(SCARDHANDLE hCard,
 	BYTE *send, DWORD sendsize, BYTE *recv, LPDWORD recvsize_p)
 {
@@ -63,10 +85,10 @@ static DWORD ykn_trancieve(SCARDHANDLE hCard,
 	DWORD rsize = *recvsize_p + 2;
 	BYTE *rbuf = alloca(rsize);
 	BYTE *sbuf = alloca(sendsize + 6);
-	memcpy(sbuf, cr_cmd, sizeof(cr_cmd));
+	memcpy(sbuf, yk_cmd, sizeof(yk_cmd));
 	sbuf[2] = cr_for_slot[slot];
-	sbuf[sizeof(cr_cmd)] = sendsize;
-	memcpy(sbuf + sizeof(cr_cmd) + 1, send, sendsize);
+	sbuf[sizeof(yk_cmd)] = sendsize;
+	memcpy(sbuf + sizeof(yk_cmd) + 1, send, sendsize);
 	sbuf[sendsize + 5] = rsize;
 	rc = SCardTransmit(hCard, &pioSendPci, sbuf, sendsize + 6,
 		NULL, rbuf, &rsize);
@@ -88,6 +110,7 @@ struct token_interface ykneo_interface = {
 	.parse_option	= ykn_parse_option,
 	.check_atr_hb	= ykn_check_atr_hb,
 	.prologue	= ykn_prologue,
+	.getserial	= ykn_getserial,
 	.trancieve	= ykn_trancieve,
 	.epilogue	= ykn_epilogue,
 };
