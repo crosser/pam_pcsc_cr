@@ -10,4 +10,7 @@ unsigned long hmac(void *key, int keylen, void *pt, int tlen,
 			void *tag, int *taglen);
 const char *crypto_errstr(unsigned long err);
 
+#define HASHSIZE 20
+#define CBLKSIZE 16
+
 #endif
