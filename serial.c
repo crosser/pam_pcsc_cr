@@ -19,6 +19,7 @@ int serial_switch(serializer_t *srl, void *buffer, int size)
 	srl->buffer = buffer;
 	srl->bufsize = size;
 	srl->cursor = buffer + used;
+	return 0;
 }
 
 int serial_put(serializer_t *srl, void *item, int size)
