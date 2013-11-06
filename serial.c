@@ -22,7 +22,7 @@ int serial_switch(serializer_t *srl, void *buffer, int size)
 	return 0;
 }
 
-int serial_put(serializer_t *srl, void *item, int size)
+int serial_put(serializer_t *srl, const void *item, int size)
 {
 	int left = srl->bufsize - (srl->cursor - srl->buffer);
 	if (left < size + sizeof(short)) return left - sizeof(short);

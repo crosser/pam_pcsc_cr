@@ -21,14 +21,14 @@ static struct crypto_interface *ifs[] = {
 
 static int which = 0;
 
-int select_crypto_if(int ifno)
+int select_crypto_if(const int ifno)
 {
 	if (ifno < 0 || ifno > MAX_IF) return -1;
 	which = ifno;
 	return 0;
 }
 
-const char *crypto_init(int ifno)
+const char *crypto_init(const int ifno)
 {
 	if (ifno < 0 || ifno > MAX_IF) return (const char *)0;
 	return ifs[ifno]->init();
@@ -36,7 +36,7 @@ const char *crypto_init(int ifno)
 
 #define INITIV {0}
 
-unsigned long encrypt(void *key, int keylen, void *pt, void *ct, int tlen)
+unsigned long encrypt(const void *key, const int keylen, const void *pt, void *ct, const int tlen)
 {
 	unsigned char iv[16] = INITIV;
 
@@ -44,7 +44,7 @@ unsigned long encrypt(void *key, int keylen, void *pt, void *ct, int tlen)
 	return ifs[which]->encrypt(key, keylen, iv, pt, ct, tlen);
 }
 
-unsigned long decrypt(void *key, int keylen, void *ct, void *pt, int tlen)
+unsigned long decrypt(const void *key, const int keylen, const void *ct, void *pt, const int tlen)
 {
 	unsigned char iv[16] = INITIV;
 
@@ -52,19 +52,19 @@ unsigned long decrypt(void *key, int keylen, void *ct, void *pt, int tlen)
 	return ifs[which]->decrypt(key, keylen, iv, ct, pt, tlen);
 }
 
-unsigned long hash(void *pt, int tlen, void *tag, int *taglen)
+unsigned long hash(const void *pt, const int tlen, void *tag, int *taglen)
 {
 	assert(*taglen == 20);
 	return ifs[which]->hash(pt, tlen, tag, taglen);
 }
 
-unsigned long hmac(void *key, int keylen, void *pt, int tlen, void *tag, int *taglen)
+unsigned long hmac(const void *key, const int keylen, const void *pt, const int tlen, void *tag, int *taglen)
 {
 	assert(*taglen == 20);
 	return ifs[which]->hmac(key, keylen, pt, tlen, tag, taglen);
 }
 
-const char *crypto_errstr(unsigned long err)
+const char *crypto_errstr(const unsigned long err)
 {
 	return ifs[which]->errstr(err);
 }
