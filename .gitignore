@@ -31,3 +31,5 @@ test_crypto
 test_crypto.trs
 test_serial
 test_serial.trs
+test_auth
+test_auth.trs

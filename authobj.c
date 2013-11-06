@@ -58,10 +58,15 @@ int make_authobj(const char *id, const char *pass, const char *nonce,
 
 	if (hmac(secret, secsize, challenge, challengesize,
 		key, &keysize)) return -1;
+#if 0
+	int i;
+	for (i = 0; i < keysize; i++) printf(", 0x%02x", key[i]);
+	printf("\n");
+#endif
 
 	if (*bufsize < datasize) return -1;
 	*bufsize = datasize;
-	if (encrypt(key, keysize, data, buffer, datasize)) return -1;
+	if (encrypt(key, CBLKSIZE, data, buffer, datasize)) return -1;
 
 	return 0;
 }
@@ -80,7 +85,7 @@ int parse_authobj(const unsigned char *key, const int keysize,
 	unsigned char theirhash[HASHSIZE];
 	int theirhashsize = HASHSIZE;
 
-	if (decrypt(key, keysize, buffer, data, datasize))
+	if (decrypt(key, CBLKSIZE, buffer, data, datasize))
 		return -1;
 	if (serial_init(&srl, data, datasize)) return -1;
 	tsize = *secsize;
