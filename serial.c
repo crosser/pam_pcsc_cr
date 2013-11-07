@@ -25,9 +25,10 @@ int serial_switch(serializer_t *srl, void *buffer, int size)
 int serial_put(serializer_t *srl, const void *item, int size)
 {
 	int left = srl->bufsize - (srl->cursor - srl->buffer);
+
 	if (left < size + sizeof(short)) return left - sizeof(short);
 	*((short *)srl->cursor) = size;
-	srl->cursor += 2;
+	srl->cursor += sizeof(short);
 	if (size) memcpy(srl->cursor, item, size);
 	srl->cursor += size;
 	return size;
@@ -35,10 +36,13 @@ int serial_put(serializer_t *srl, const void *item, int size)
 
 int serial_get(serializer_t *srl, void *item, int bufsize)
 {
+	int left = srl->bufsize - (srl->cursor - srl->buffer);
 	short isize = *((short *)srl->cursor);
-	if (isize > bufsize || isize == 0) return isize;
+
+	if (isize > bufsize) return isize;
+	if (isize + sizeof(short) > left) return -1;
 	srl->cursor += sizeof(short);
-	memcpy(item, srl->cursor, isize);
+	if (isize) memcpy(item, srl->cursor, isize);
 	srl->cursor += isize;
 	return isize;
 }
