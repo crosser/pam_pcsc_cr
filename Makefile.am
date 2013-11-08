@@ -24,3 +24,4 @@ test_chalresp_LDADD = libpcsc_cr.la
 EXTRA_DIST = autogen.sh README_CR
 
 TESTS = test_auth test_serial test_crypto test_chalresp
+XFAIL_TESTS = test_chalresp
