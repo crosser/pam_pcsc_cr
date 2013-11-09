@@ -14,10 +14,7 @@ int main(int argc, char *argv[])
 	int i, rc;
 	serializer_t srl;
 
-	if ((rc = serial_init(&srl, buffer, sizeof(buffer)))) {
-		printf("serial_init rc=%d\n", rc);
-		return 1;
-	}
+	serial_init(&srl, buffer, sizeof(buffer));
 	for (i = 0; in[i]; i++) {
 		int size = strlen(in[i]);
 		if ((rc = serial_put(&srl, in[i], size)) != size) {
@@ -31,10 +28,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	printf("serialized size=%d\n", serial_size(&srl));
-	if ((rc = serial_init(&srl, buffer, sizeof(buffer)))) {
-		printf("second serial_init rc=%d\n", rc);
-		return 1;
-	}
+	serial_init(&srl, buffer, sizeof(buffer));
 	for (i = 0; i < 4; i++) {
 		char item[32];
 		memset(item, 0, sizeof(item));

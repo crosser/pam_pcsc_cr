@@ -1,6 +1,8 @@
 #ifndef _AUTHOBJ_H
 #define _AUTHOBJ_H
 
+enum aobj_err {aoe_serial, aoe_size, aoe_crypt, aoe_data};
+
 int make_challenge(const char *id, const char *pass, const char *nonce,
 		unsigned char *challenge, int *challengesize);
 int make_authobj(const char *id, const char *pass, const char *nonce,

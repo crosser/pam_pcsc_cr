@@ -4,14 +4,13 @@
 #include <string.h>
 #include "serial.h"
 
-int serial_init(serializer_t *srl, void *buffer, int size)
+void serial_init(serializer_t *srl, void *buffer, int size)
 {
 	srl->buffer = srl->cursor = buffer;
 	srl->bufsize = size;
-	return 0;
 }
 
-int serial_switch(serializer_t *srl, void *buffer, int size)
+void serial_switch(serializer_t *srl, void *buffer, int size)
 {
 	int used = srl->cursor - srl->buffer;
 
@@ -19,7 +18,6 @@ int serial_switch(serializer_t *srl, void *buffer, int size)
 	srl->buffer = buffer;
 	srl->bufsize = size;
 	srl->cursor = buffer + used;
-	return 0;
 }
 
 int serial_put(serializer_t *srl, const void *item, int size)
