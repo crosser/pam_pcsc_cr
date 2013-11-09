@@ -67,8 +67,29 @@ AS_IF([test "x$TOMCRYPT_CFLAGS" != "x" -o "x$TOMCRYPT_LIBS" != "x" ], [
 CPPFLAGS="$TOMCRYPT_CFLAGS $CPPFLAGS"
 LIBS="$TOMCRYPT_LIBS $LIBS"
 
-AS_IF([test "x$use_openssl" != "xyes" -a "x$use_tomcrypt" != "xyes"], [
-  AC_MSG_ERROR([[Neither openssl nor tomcrypt libraries present]])
+AC_ARG_ENABLE(gcrypt,
+	[  --enable-gcrypt         use libgcrypt even when openssl present])
+
+AS_IF([test "x$use_openssl" != "xyes" && test "x$use_tomcrypt" != "xyes" || \
+	test "x$enable_tomcrypt" = "xyes"], [
+  AM_PATH_LIBGCRYPT()
+])
+AC_ARG_WITH(libgcrypt-include-path,
+	[  --with-libgcrypt-include-path=PATH path to libgcrypt includes],
+	[LIBGCRYPT_CFLAGS="-I $withval"],
+	[])
+AC_ARG_WITH(libgcrypt-lib-path,
+	[  --with-libgcrypt-lib-path=PATH path to libgcrypt libs],
+	[LIBGCRYPT_LIBS="-L $withval -lgcrypt"],
+	[])
+AS_IF([test "x$LIBGCRYPT_CFLAGS" != "x" -o "x$LIBGCRYPT_LIBS" != "x" ], [
+  use_gcrypt=yes
+])
+CPPFLAGS="$LIBGCRYPT_CFLAGS $CPPFLAGS"
+LIBS="$LIBGCRYPT_LIBS $LIBS"
+
+AS_IF([test "x$use_openssl" != "xyes" -a "x$use_tomcrypt" != "xyes" -a "x$use_gcrypt" != "xyes"], [
+  AC_MSG_ERROR([[Neither openssl, tomcrypt or gcrypt libraries present]])
 ])
 
 AS_IF([test "x$use_openssl" = "xyes"], [
@@ -78,6 +99,10 @@ AS_IF([test "x$use_openssl" = "xyes"], [
 AS_IF([test "x$use_tomcrypt" = "xyes"], [
   CRYPTO_OBJS+=" tom_crypto.lo"
   AC_DEFINE([HAVE_TOMCRYPT], [1], [Use libtomcrypt])
+])
+AS_IF([test "x$use_gcrypt" = "xyes"], [
+  CRYPTO_OBJS+=" gnu_crypto.lo"
+  AC_DEFINE([HAVE_GCRYPT], [1], [Use libgcrypt])
 ])
 AC_SUBST(CRYPTO_OBJS)
 

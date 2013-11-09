@@ -7,6 +7,7 @@
 
 extern struct crypto_interface ossl_crypto_if;
 extern struct crypto_interface tom_crypto_if;
+extern struct crypto_interface gnu_crypto_if;
 
 static struct crypto_interface *ifs[] = {
 #ifdef HAVE_OPENSSL
@@ -14,6 +15,9 @@ static struct crypto_interface *ifs[] = {
 #endif
 #ifdef HAVE_TOMCRYPT
 	&tom_crypto_if,
+#endif
+#ifdef HAVE_GCRYPT
+	&gnu_crypto_if,
 #endif
 	(void*)0,
 };
