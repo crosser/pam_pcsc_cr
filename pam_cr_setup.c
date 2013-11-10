@@ -13,9 +13,13 @@
 int eprint(const char *format, ...)
 {
 	va_list ap;
+	char *nfmt;
 
+	nfmt = alloca(strlen(format)+2);
+	strcpy(nfmt, format);
+	strcat(nfmt, "\n");
 	va_start(ap, format);
-	return vfprintf(stderr, format, ap);
+	return vfprintf(stderr, nfmt, ap);
 	va_end(ap);
 }
 
@@ -30,7 +34,7 @@ static void usage(const char const *cmd)
 		"    -s token-serial   - public I.D. of the token\n"
 		"    -n nonce          - initial nonce\n"
 		"    -l payload        - keyring unlock password\n"
-		"    -p password       - login password\n"
+		"    -p password       - login password"
 		, cmd);
 }
 
@@ -57,7 +61,7 @@ int main(int argc, char *argv[])
 		exit(EXIT_SUCCESS);
 	case 'o':
 		if (pcsc_option(optarg)) {
-			eprint("Option \"%s\" bad\n", optarg);
+			eprint("Option \"%s\" bad", optarg);
 			exit(EXIT_FAILURE);
 		}
 		break;
@@ -68,7 +72,7 @@ int main(int argc, char *argv[])
 		if (!secfn) {
 			hsecret = optarg;
 		} else {
-			eprint("-a and -A are mutually exclusive\n");
+			eprint("-a and -A are mutually exclusive");
 			exit(EXIT_FAILURE);
 		}
 		break;
@@ -76,7 +80,7 @@ int main(int argc, char *argv[])
 		if (!hsecret) {
 			secfn = optarg;
 		} else {
-			eprint("-A and -a are mutually exclusive\n");
+			eprint("-A and -a are mutually exclusive");
 			exit(EXIT_FAILURE);
 		}
 		break;
@@ -111,12 +115,12 @@ int main(int argc, char *argv[])
 		if (!strcmp(secfn, "-")) sfp = stdin;
 		else sfp = fopen(secfn, "r");
 		if (!sfp) {
-			eprint("cannot open \"%s\": %s\n",
+			eprint("cannot open \"%s\": %s",
 				secfn, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
 		if (!fgets(secbuf, sizeof(secbuf), sfp)) {
-			eprint("cannot read \"%s\": %s\n",
+			eprint("cannot read \"%s\": %s",
 				secfn, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
@@ -127,7 +131,7 @@ int main(int argc, char *argv[])
 		hsecret = secbuf;
 	}
 	if (!id) {
-		eprint("cannot determine userid\n");
+		eprint("cannot determine userid");
 		exit(EXIT_FAILURE);
 	}
 	if (hsecret) {
