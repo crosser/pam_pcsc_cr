@@ -41,7 +41,7 @@ int make_authobj(const char *id, const char *pass, const char *nonce,
 	int keysize = HASHSIZE;
 	serializer_t srl;
 
-	datasize = ((secsize + paysize + HASHSIZE * 4 * sizeof(short) - 1) /
+	datasize = ((secsize + paysize + HASHSIZE + 4 * sizeof(short) - 1) /
 			CBLKSIZE + 1) * CBLKSIZE;
 	data = alloca(datasize);
 	serial_init(&srl, data, datasize);

@@ -1,6 +1,8 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,24 +25,40 @@ int update_authfile(const char *fn, const char *tokenid, const char *id,
 	int i;
 	unsigned char key[20];
 	int keysize = sizeof(key);
-	unsigned char mysecret[20];
-	int mysecsize = sizeof(mysecret);
-	unsigned char myload[256];
-	int myloadsize = sizeof(myload);
-	unsigned char *authobj = alloca(OBJSIZE);
-	int authsize = OBJSIZE;
-	char buf[512];
-	char *oldtokenid = NULL, *oldid = NULL, *oldnonce = NULL,
-		*hauthobj = NULL;
+	unsigned char *mysecret = secret;
+	int mysecsize = secsize;
+	unsigned char *myload = payload;
+	int myloadsize = paysize;
+	unsigned char *authobj = NULL;
+	int authsize = 0;
+	char *buf = NULL;
+	char *mytokenid = NULL;
+	char *myid = NULL;
+	char *mynonce = NULL;
+	char *hauthobj = NULL;
 	unsigned char *oldauthobj = NULL;
 	int oldauthsize;
 
 	if ((fp = fopen(fn, "r"))) {
-		if (fgets(buf, sizeof(buf), fp)) {
-			oldtokenid = strtok(buf, ":\r\n");
-			oldid = strtok(NULL, ":\r\n");
-			oldnonce = strtok(NULL, ":\r\n");
-			hauthobj = strtok(NULL, ":\r\n");
+		struct stat st;
+		int fd = fileno(fp);
+
+		if (!fstat(fd, &st)) {
+			eprint("fstat \"%s\" (fd %d) error: %s",
+				fn, fd, strerror(errno));
+			st.st_size = 2047;
+		}
+		if (st.st_size > 2047) st.st_size = 2047;
+		buf = alloca(st.st_size + 1);
+		if (fgets(buf, st.st_size + 1, fp)) {
+			char *p;
+
+			p = &buf[strlen(buf) - 1];
+			while (*p == '\n' || *p == '\r') *p-- = '\0';
+			mytokenid = strtok(buf, ":");
+			myid = strtok(NULL, ":");
+			mynonce = strtok(NULL, ":");
+			hauthobj = strtok(NULL, ":");
 		} else {
 			eprint("error reading from %s: %s",
 				fn, strerror(errno));
@@ -64,12 +82,17 @@ int update_authfile(const char *fn, const char *tokenid, const char *id,
 		}
 	}
 
-	if (oldauthobj && password && !secret) {
+	if (!secret) {
 		unsigned char chal[64];
 		int csize = sizeof(chal);
 		long rc;
 
-		rc = make_challenge(id, password, nonce, chal, &csize);
+		if (!oldauthobj || !password) {
+			eprint("if no secret given, old auth file must"
+				" be present and password must be given");
+			return -1;
+		}
+		rc = make_challenge(myid, password, mynonce, chal, &csize);
 		if (rc) {
 			eprint("cannot make challenge");
 			return -1;
@@ -79,6 +102,10 @@ int update_authfile(const char *fn, const char *tokenid, const char *id,
 			eprint("error querying token: %s", pcsc_errstr(rc));
 			return -1;
 		}
+		mysecsize = oldauthsize;
+		mysecret = alloca(mysecsize);
+		myloadsize  = oldauthsize;
+		myload = alloca(myloadsize);
 		rc = parse_authobj(key, keysize, oldauthobj, oldauthsize,
 			mysecret, &mysecsize, myload, &myloadsize);
 		if (rc) {
@@ -86,33 +113,45 @@ int update_authfile(const char *fn, const char *tokenid, const char *id,
 			return -1;
 		}
 	}
+	if (tokenid) mytokenid = tokenid;
+	if (id) myid = id;
+	if (nonce) mynonce = nonce;
+	else {
+		unsigned int prev = atoi(mynonce);
+		mynonce = alloca(16);
+		sprintf(mynonce, "%d", prev + 1);
+	}
 
-	rc = make_authobj(id, password, nonce, mysecret, mysecsize,
-			payload, paysize, authobj, &authsize);
+	authsize = ((mysecsize + myloadsize + 16 + 4 * sizeof(short) - 1) /
+			16 + 1) * 16;
+	authobj = alloca(authsize);
+	rc = make_authobj(myid, password, mynonce, mysecret, mysecsize,
+			myload, myloadsize, authobj, &authsize);
 	if (rc) {
 		eprint("make_authobj error %d", rc);
 		return -1;
 	}
-	fp = fopen(fn, "w");
-	if (!fp) {
+
+	if ((fp = fopen(fn, "w"))) {
+		if (fprintf(fp, "%s:%s:%s:", mytokenid, myid, mynonce) < 0) {
+			eprint("cannot write to \"%s\": %s",
+				fn, strerror(errno));
+			return -1;
+		}
+		for (i = 0; i < authsize; i++)
+		    if (fprintf(fp, "%02x", authobj[i]) < 0) {
+			eprint("cannot write to \"%s\": %s",
+				fn, strerror(errno));
+			return -1;
+		}
+		fprintf(fp, "\n");
+		if (fclose(fp) < 0) {
+			eprint("cannot close \"%s\": %s",
+				fn, strerror(errno));
+			return -1;
+		}
+	} else {
 		eprint("cannot open \"%s\": %s",
-			fn, strerror(errno));
-		return -1;
-	}
-	if (fprintf(fp, "%s:%s:%s:", tokenid, id, nonce) < 0) {
-		eprint("cannot write to \"%s\": %s",
-			fn, strerror(errno));
-		return -1;
-	}
-	for (i = 0; i < authsize; i++)
-	    if (fprintf(fp, "%02x", authobj[i]) < 0) {
-		eprint("cannot write to \"%s\": %s",
-			fn, strerror(errno));
-		return -1;
-	}
-	fprintf(fp, "\n");
-	if (fclose(fp) < 0) {
-		eprint("cannot close \"%s\": %s",
 			fn, strerror(errno));
 		return -1;
 	}

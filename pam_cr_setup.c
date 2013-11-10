@@ -48,8 +48,8 @@ int main(int argc, char *argv[])
 	unsigned char bsecret[20];
 	unsigned char *secret = NULL;
 	int i;
-	char *nonce = "1";
-	char *tokenid = "";
+	char *nonce = NULL;
+	char *tokenid = NULL;
 	char *id = getlogin();
 	char *payload = "";
 	char *password = "";
