@@ -33,3 +33,4 @@ test_serial
 test_serial.trs
 test_auth
 test_auth.trs
+pam_cr_setup
