@@ -43,7 +43,7 @@ int update_authfile(const char *fn, const char *tokenid, const char *id,
 		struct stat st;
 		int fd = fileno(fp);
 
-		if (!fstat(fd, &st)) {
+		if (fstat(fd, &st)) {
 			eprint("fstat \"%s\" (fd %d) error: %s",
 				fn, fd, strerror(errno));
 			st.st_size = 2047;
