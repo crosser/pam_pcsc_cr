@@ -7,13 +7,18 @@ user record:
 		data:
 			shared-secret
 			payload
-			crc
+			sha1(
+				shared-secret
+				payload
+			)
 		key:
 			hmac-sha1:
 				data:
-					userid
-					password
-					seqno
+					sha1(
+						userid
+						password
+						seqno
+					)
 				key:
 					shared-secret
 
