@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "authobj.h"
 #include "crypto.h"
 
@@ -14,40 +15,40 @@ int main(int argc, char *argv[])
 					0xfc, 0xa0, 0xfc, 0x56, 0x56};
 	const unsigned char *payload = (unsigned char *)
 					"To authorize or not to authorize?";
-	unsigned char authobj[128];
-	int authsize = sizeof(authobj);
-	unsigned char challenge[128];
-	int challengesize = sizeof(challenge);
-	int rc;
-	unsigned char key[20];
-	int keysize = sizeof(key);
-	unsigned char newsecret[20];
-	int newsecsize = sizeof(newsecret);
-	unsigned char newload[128];
-	int newloadsize=sizeof(newload);
+	int i;
+	struct _auth_obj ao;
+	struct _auth_obj nao;
 
-	rc = make_authobj(id, pass, nonce, secret, sizeof(secret),
-			payload, strlen((char *)payload),
-			authobj, &authsize);
-	printf("make_authobj() rc=%d size=%d\n", rc, authsize);
-	if (rc) return rc;
-
-	rc = make_challenge(id, pass, nonce, challenge, &challengesize);
-	printf("make_challenge() rc=%d size=%d\n", rc, challengesize);
-	if (rc) return rc;
-	rc = hmac(secret, sizeof(secret), challenge, challengesize,
-		&key, &keysize);
-	printf("hmac(secret, challenge) rc=%d new_key_size=%d\n",
-		rc, keysize);
-	if (rc) return rc;
-
-	rc = parse_authobj(key, sizeof(key), authobj, authsize,
-			newsecret, &newsecsize, newload, &newloadsize);
-	printf("parse_authobj() rc=%d secretsize=%d payload=\"%.*s\" (%d)\n",
-		rc, newsecsize, newloadsize, newload, newloadsize);
-	if (memcmp(secret, newsecret, newsecsize)) {
-		printf("extracted secret does not match\n");
-		return -1;
+	printf("using crypto %s\n", crypto_init(0));
+	ao = new_authobj(id, pass, nonce, secret, sizeof(secret),
+			payload, strlen((char *)payload));
+	printf("new_authobj err=%s\n", ao.err?ao.err:"<no error>");
+	printf("data(%d):", ao.datasize);
+	for (i = 0; i < ao.datasize; i++) printf(" %02x", ao.data[i]);
+	printf("\npayload(%d): \"%.*s\"\n", ao.paylsize, ao.paylsize,
+		ao.payload?(char*)ao.payload:"");
+	if (ao.err) {
+		if (ao.buffer) free(ao.buffer);
+		return 1;
 	}
+
+	nao = verify_authobj(id, pass, nonce, nonce, ao.data, ao.datasize);
+	printf("verify_authobj err=%s\n", nao.err?nao.err:"<no error>");
+	printf("data(%d):", nao.datasize);
+	for (i = 0; i < nao.datasize; i++) printf(" %02x", nao.data[i]);
+	printf("\npayload(%d): \"%.*s\"\n", nao.paylsize, nao.paylsize,
+		nao.payload?(char*)nao.payload:"");
+	if (nao.err) {
+		if (nao.buffer) free(nao.buffer);
+		return 1;
+	}
+	if (ao.paylsize != nao.paylsize ||
+			memcmp(ao.payload, nao.payload, ao.paylsize)) {
+		printf("payload does not match");
+		return 1;
+	}
+
+	if (ao.buffer) free(ao.buffer);
+	if (nao.buffer) free(nao.buffer);
 	return 0;
 }

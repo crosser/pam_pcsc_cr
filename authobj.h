@@ -4,8 +4,8 @@
 struct _auth_obj {
 	unsigned char *buffer;	/* to be free()'d if not NULL */
 	const char *err;	/* non-NULL if failed */
-	unsigned char *authobj;
-	int authsize;
+	unsigned char *data;
+	int datasize;
 	unsigned char *payload;
 	int paylsize;
 };
