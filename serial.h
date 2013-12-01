@@ -10,7 +10,7 @@ typedef struct _serializer {
 void serial_init(serializer_t *srl, void *buffer, int size);
 void serial_switch(serializer_t *srl, void *buffer, int size);
 int serial_put(serializer_t *srl, const void *item, int size);
-int serial_get(serializer_t *srl, void *item, int bufsize);
+int serial_get(serializer_t *srl, void **item, int *size);
 int serial_size(serializer_t *srl);
 
 #endif

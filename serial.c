@@ -20,6 +20,7 @@ void serial_switch(serializer_t *srl, void *buffer, int size)
 	srl->cursor = buffer + used;
 }
 
+/* returns 'size' on success, or remainging space if it was insufficient */
 int serial_put(serializer_t *srl, const void *item, int size)
 {
 	int left = srl->bufsize - (srl->cursor - srl->buffer);
@@ -32,17 +33,18 @@ int serial_put(serializer_t *srl, const void *item, int size)
 	return size;
 }
 
-int serial_get(serializer_t *srl, void *item, int bufsize)
+/* return 0 on success, -1 on wrong encoding (item longer than space left) */
+int serial_get(serializer_t *srl, void **item, int *size)
 {
 	int left = srl->bufsize - (srl->cursor - srl->buffer);
 	short isize = *((short *)srl->cursor);
 
-	if (isize > bufsize) return isize;
 	if (isize + sizeof(short) > left) return -1;
 	srl->cursor += sizeof(short);
-	if (isize) memcpy(item, srl->cursor, isize);
+	*item = srl->cursor;
+	*size = isize;
 	srl->cursor += isize;
-	return isize;
+	return 0;
 }
 
 int serial_size(serializer_t *srl)
