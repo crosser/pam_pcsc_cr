@@ -158,19 +158,19 @@ parse_authobj(const unsigned char *key, const int keysize,
 
 		serial_init(&srl, ao.buffer, bufsize);
 		if (serial_get(&srl, (void**)&ao.data, &ao.datasize)) {
-			ao.err = "parse authobj: too long secret";
+			ao.err = "mismatch: impossible secret";
 		} else if (serial_get(&srl, (void**)&ao.payload, &ao.paylsize)) {
-			ao.err = "parse authobj: too long payload";
+			ao.err = "mismatch: impossible payload";
 		} else if ((rc = hash(ao.buffer, serial_size(&srl),
 					myhash, &myhsize))) {
 			ao.err = crypto_errstr(rc);
 		} else if (serial_get(&srl, (void**)&theirhash, &theirhsize)) {
-			ao.err = "parse authobj: too long hash";
+			ao.err = "mismatch: impossible hash";
 		} else if (theirhsize != HASHSIZE) {
-			ao.err = "parse authobj: hash is of wrong size";
+			ao.err = "mismatch: hash is of wrong size";
 		} else if ((myhsize != theirhsize) ||
 		    		memcmp(myhash, theirhash, myhsize)) {
-			ao.err = "parse authobj: hash mismatch";
+			ao.err = "mismatch: different hash";
 		}
 	}
 	return ao;

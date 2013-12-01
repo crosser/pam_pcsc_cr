@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 	const char *id = "testuser";
 	const char *pass = "testpassword";
 	const char *nonce = "1";
-	const unsigned char secret[] = {0xb4, 0x62, 0xf2, 0x60, 0x87,
+	unsigned char secret[] = {0xb4, 0x62, 0xf2, 0x60, 0x87,
 					0x78, 0x16, 0x87, 0xde, 0xce,
 					0x80, 0x09, 0x24, 0x0b, 0x93,
 					0xfc, 0xa0, 0xfc, 0x56, 0x56};
@@ -19,7 +19,11 @@ int main(int argc, char *argv[])
 	struct _auth_obj ao;
 	struct _auth_obj nao;
 
-	printf("using crypto %s\n", crypto_init(0));
+	if (argc == 2 && strlen(argv[1]) == 40 &&
+			strspn(argv[1], "0123456789abcdefABCDEF") == 40) {
+		for (i = 0; i < sizeof(secret); i++)
+			sscanf(&argv[1][i*2], "%2hhx", &secret[i]);
+	}
 	ao = new_authobj(id, pass, nonce, secret, sizeof(secret),
 			payload, strlen((char *)payload));
 	printf("new_authobj err=%s\n", ao.err?ao.err:"<no error>");
