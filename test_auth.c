@@ -4,15 +4,38 @@
 #include "authobj.h"
 #include "crypto.h"
 
+unsigned char secret[] = {
+	0xb4, 0x62, 0xf2, 0x60, 0x87, 0x78, 0x16, 0x87, 0xde, 0xce,
+	0x80, 0x09, 0x24, 0x0b, 0x93, 0xfc, 0xa0, 0xfc, 0x56, 0x56
+};
+
+static struct _auth_chunk
+fetch_key(const unsigned char *challenge, const int challengesize)
+{
+	struct _auth_chunk ho = {0};
+	long rc;
+	int keysize = sizeof(ho.data);
+
+#if 0	/* The "real" fetch_key shall do this: */
+	if ((rc = pcsc_cr(challenge, challengesize, ho.data, &keysize))) {
+		ho.err = pcsc_errstr(rc);
+	}
+#else	/* Instead, duplicate make_key so it works without the token */
+	if ((rc = hmac(secret, sizeof(secret), challenge, challengesize,
+						&ho.data, &keysize))) {
+		ho.err = crypto_errstr(rc);
+	} else if (keysize != sizeof(ho.data)) {
+		ho.err = "make_key: hash size is wrong";
+	}
+#endif
+	return ho;
+}
+
 int main(int argc, char *argv[])
 {
 	const char *id = "testuser";
 	const char *pass = "testpassword";
 	const char *nonce = "1";
-	unsigned char secret[] = {0xb4, 0x62, 0xf2, 0x60, 0x87,
-					0x78, 0x16, 0x87, 0xde, 0xce,
-					0x80, 0x09, 0x24, 0x0b, 0x93,
-					0xfc, 0xa0, 0xfc, 0x56, 0x56};
 	const unsigned char *payload = (unsigned char *)
 					"To authorize or not to authorize?";
 	int i;

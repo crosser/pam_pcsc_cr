@@ -9,21 +9,16 @@
 #include "authobj.h"
 #include "pcsc_cr.h"
 
-struct _hash_obj {
-	const char *err;
-	unsigned char hash[HASHSIZE];
-};
-
-static struct _hash_obj
+static struct _auth_chunk
 make_challenge(const char *uid, const char *pass, const char *nonce)
 {
-	struct _hash_obj ho = {0};
+	struct _auth_chunk ho = {0};
 	unsigned long rc;
 	serializer_t srl;
 	int datasize = strlen(uid) + strlen(pass) + strlen(nonce) +
 			4 * sizeof(short);
 	unsigned char *data = alloca(datasize);
-	int hashsize = sizeof(ho.hash);
+	int hashsize = sizeof(ho.data);
 
 	serial_init(&srl, data, datasize);
 	if (serial_put(&srl, uid, strlen(uid)) != strlen(uid)) {
@@ -36,9 +31,9 @@ make_challenge(const char *uid, const char *pass, const char *nonce)
 		ho.err = "challenge: serialization of terminator failed";
 	}
 	if (!ho.err) {
-		if ((rc = hash(data, serial_size(&srl), &ho.hash, &hashsize))) {
+		if ((rc = hash(data, serial_size(&srl), &ho.data, &hashsize))) {
 			ho.err = crypto_errstr(rc);
-		} else if (hashsize != sizeof(ho.hash)) {
+		} else if (hashsize != sizeof(ho.data)) {
 			ho.err = "challenge: hash size is wrong";
 		}
 	}
@@ -46,40 +41,27 @@ make_challenge(const char *uid, const char *pass, const char *nonce)
 	return ho;
 }
 
-static struct _hash_obj
+static struct _auth_chunk
 make_key(const unsigned char *challenge, const int challengesize,
 	const unsigned char *secret, const int secsize)
 {
-	struct _hash_obj ho = {0};
+	struct _auth_chunk ho = {0};
 	unsigned long rc;
-	int keysize = sizeof(ho.hash);
+	int keysize = sizeof(ho.data);
 
 	if ((rc = hmac(secret, secsize, challenge, challengesize,
-			&ho.hash, &keysize))) {
+			&ho.data, &keysize))) {
 		ho.err = crypto_errstr(rc);
-	} else if (keysize != sizeof(ho.hash)) {
+	} else if (keysize != sizeof(ho.data)) {
 		ho.err = "make_key: hash size is wrong";
 	}
 	return ho;
 }
 
-static struct _hash_obj
-fetch_key(const unsigned char *challenge, const int challengesize)
-{
-	struct _hash_obj ho = {0};
-	long rc;
-	int keysize = sizeof(ho.hash);
-
-	if ((rc = pcsc_cr(challenge, challengesize, ho.hash, &keysize))) {
-		ho.err = pcsc_errstr(rc);
-	}
-	return ho;
-}
-
 static struct _auth_obj
-make_authobj(const unsigned char *key, const int keysize,
+make_authobj(char *userid, char *password, char *nonce,
 		const unsigned char *secret, const int secsize,
-		const unsigned char *payload, const int paysize)
+		const unsigned char *payload, const int paylsize)
 {
 	struct _auth_obj ao = {0};
 	unsigned long rc;
@@ -136,8 +118,11 @@ make_authobj(const unsigned char *key, const int keysize,
 }
 
 static struct _auth_obj
-parse_authobj(const unsigned char *key, const int keysize,
-		const unsigned char *buffer, const int bufsize)
+parse_authobj(char *userid, char *password, char *nonce,
+		const unsigned char *secret, const int secsize,
+		const unsigned char *ablob, const int blobsize,
+		struct _auth_chunk (*fetch_key)(const unsigned char *chal,
+						const int csize))
 {
 	unsigned long rc;
 	struct _auth_obj ao = {0};
@@ -176,45 +161,71 @@ parse_authobj(const unsigned char *key, const int keysize,
 	return ao;
 }
 
-struct _auth_obj new_authobj(const char *userid, const char *password,
-				const char *nonce,
-			const unsigned char *secret, const int secsize,
-			const unsigned char *payload, const int paysize)
+struct _auth_obj authobj(const char *userid, const char *password,
+		const char *oldnonce, const char *newnonce,
+		const unsigned char *secret, const int secsize,
+		const unsigned char *payload, const int paylsize,
+		const unsigned char *ablob, const int blobsize,
+		struct _auth_chunk (*fetch_key)(const unsigned char *chal,
+						const int csize))
 {
+	unsigned char *wsecret;
+	int wsecsize;
+	unsigned char *wpayload;
+	int wpaylsize;
+	struct _auth_obj old_ao;
 	struct _auth_obj new_ao = {0};
-	struct _hash_obj ho_chal, ho_key;
 
-	ho_chal = make_challenge(userid, password, nonce);
-	if (ho_chal.err) {
-		new_ao.err = ho_chal.err;
-		return new_ao;
+	if (!secret || !secsize || !payload) {
+		old_ao = parse_authobj(userid, password, oldnonce,
+					secret, secsize,
+					ablob, blobsize, fetch_key);
+		if (old_ao.err) {
+			new_ao.err = old_ao.err;
+			if (old_ao.buffer) free(old_ao.buffer);
+			return new_ao;
+		} else {
+			if (secret && secsize) {
+				wsecret = secret;
+				wsecsize = secsize;
+			} else {
+				wsecret = old_ao.data;
+				wsecsize = old_ao.datasize;
+			}
+			if (payload) {
+				wpayload = payload;
+				wpaylsize = paylsize;
+			} else {
+				wpayload = old_ao.payload;
+				wpaylsize = old_ao.paylsize;
+			}
+		}
+	} else {
+		wsecret = secret;
+		wsecsize = secsize;
+		wpayload = payload;
+		wpaylsize = paylsize;
 	}
-	ho_key = make_key(ho_chal.hash, sizeof(ho_chal.hash), secret, secsize);
-	memset(&ho_chal, 0, sizeof(ho_chal));
-	if (ho_key.err) {
-		new_ao.err = ho_key.err;
-		return new_ao;
-	}
-	new_ao = make_authobj(ho_key.hash, sizeof(ho_key.hash),
-			secret, secsize, payload, paysize);
-	memset(&ho_key, 0, sizeof(ho_key));
+
+
+	new_ao = make_authobj(userid, password, newnonce,
+				wsecret, wsecsize, wpayload, wpaysize);
+
+	if (old_ao.data) memset(old_ao.data, 0, old_ao.datasize);
+	if (old_ao.payload) memset(old_ao.payload, 0, old_ao.paylsize);
+	if (old_ao.buffer) free(old_ao.buffer);
 	return new_ao;
 }
 
-struct _auth_obj verify_authobj(const char *userid, const char *password,
-				const char *oldnonce, const char *newnonce,
-			const unsigned char *authobj, const int authsize)
-{
-	struct _auth_obj old_ao;
-	struct _auth_obj new_ao = {0};
-	struct _hash_obj ho_chal, ho_key;
+void dummy() {
+	struct _auth_chunk ho_chal, ho_key;
 
 	ho_chal = make_challenge(userid, password, oldnonce);
 	if (ho_chal.err) {
 		new_ao.err = ho_chal.err;
 		return new_ao;
 	}
-	ho_key = fetch_key(ho_chal.hash, sizeof(ho_chal.hash));
+	ho_key = (*fetch_key)(ho_chal.hash, sizeof(ho_chal.hash));
 	memset(&ho_chal, 0, sizeof(ho_chal));
 	if (ho_key.err) {
 		new_ao.err = ho_key.err;
@@ -246,32 +257,4 @@ struct _auth_obj verify_authobj(const char *userid, const char *password,
 			old_ao.payload, old_ao.paylsize);
 	memset(&ho_key, 0, sizeof(ho_key));
 
-	if (old_ao.data) memset(old_ao.data, 0, old_ao.datasize);
-	if (old_ao.payload) memset(old_ao.payload, 0, old_ao.paylsize);
-	if (old_ao.buffer) free(old_ao.buffer);
-	return new_ao;
-}
-
-struct _auth_obj reload_authobj(const char *userid, const char *password,
-				const char *oldnonce, const char *newnonce,
-			const unsigned char *authobj, const int authsize,
-			const unsigned char *payload, const int paysize)
-{
-	struct _auth_obj old_ao;
-	struct _auth_obj new_ao = {0};
-	struct _hash_obj ho_chal, ho_key;
-
-	ho_chal = make_challenge(userid, password, oldnonce);
-	if (ho_chal.err) {
-		new_ao.err = ho_chal.err;
-		return new_ao;
-	}
-	ho_key = fetch_key(ho_chal.hash, sizeof(ho_chal.hash));
-	memset(&ho_chal, 0, sizeof(ho_chal));
-	if (ho_key.err) {
-		new_ao.err = ho_key.err;
-		return new_ao;
-	}
-	memset(&ho_key, 0, sizeof(ho_key));
-	return new_ao;
 }
