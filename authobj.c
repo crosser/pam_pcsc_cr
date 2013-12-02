@@ -3,11 +3,11 @@
 #endif
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <alloca.h>
 #include "serial.h"
 #include "crypto.h"
 #include "authobj.h"
-#include "pcsc_cr.h"
 
 static struct _auth_chunk
 make_challenge(const char *uid, const char *pass, const char *nonce)
@@ -88,7 +88,7 @@ make_key(const char *userid, const char *password, const char *nonce,
 }
 
 static struct _auth_obj
-make_authobj(char *userid, char *password, char *nonce,
+make_authobj(const char *userid, const char *password, const char *nonce,
 		const unsigned char *secret, const int secsize,
 		const unsigned char *payload, const int paylsize)
 {
@@ -146,7 +146,7 @@ make_authobj(char *userid, char *password, char *nonce,
 }
 
 static struct _auth_obj
-parse_authobj(char *userid, char *password, char *nonce,
+parse_authobj(const char *userid, const char *password, const char *nonce,
 		const unsigned char *secret, const int secsize,
 		const unsigned char *ablob, const int blobsize,
 		struct _auth_chunk (*fetch_key)(const unsigned char *chal,
@@ -201,9 +201,9 @@ struct _auth_obj authobj(const char *userid, const char *password,
 		struct _auth_chunk (*fetch_key)(const unsigned char *chal,
 						const int csize))
 {
-	unsigned char *wsecret;
+	const unsigned char *wsecret;
 	int wsecsize;
-	unsigned char *wpayload;
+	const unsigned char *wpayload;
 	int wpaylsize;
 	struct _auth_obj old_ao = {0};
 	struct _auth_obj new_ao = {0};
