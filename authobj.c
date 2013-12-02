@@ -205,7 +205,7 @@ struct _auth_obj authobj(const char *userid, const char *password,
 	int wsecsize;
 	unsigned char *wpayload;
 	int wpaylsize;
-	struct _auth_obj old_ao;
+	struct _auth_obj old_ao = {0};
 	struct _auth_obj new_ao = {0};
 
 	if (!secret || !secsize || !payload) {

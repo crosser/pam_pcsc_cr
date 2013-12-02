@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "authobj.h"
 #include "crypto.h"
+#include "pcsc_cr.h"
 
 unsigned char secret[] = {
 	0xb4, 0x62, 0xf2, 0x60, 0x87, 0x78, 0x16, 0x87, 0xde, 0xce,
@@ -10,24 +11,31 @@ unsigned char secret[] = {
 };
 
 static struct _auth_chunk
-fetch_key(const unsigned char *challenge, const int challengesize)
+conjure_key(const unsigned char *challenge, const int challengesize)
 {
 	struct _auth_chunk ho = {0};
 	long rc;
 	int keysize = sizeof(ho.data);
 
-#if 0	/* The "real" fetch_key shall do this: */
-	if ((rc = pcsc_cr(challenge, challengesize, ho.data, &keysize))) {
-		ho.err = pcsc_errstr(rc);
-	}
-#else	/* Instead, duplicate make_key so it works without the token */
 	if ((rc = hmac(secret, sizeof(secret), challenge, challengesize,
 						&ho.data, &keysize))) {
 		ho.err = crypto_errstr(rc);
 	} else if (keysize != sizeof(ho.data)) {
 		ho.err = "make_key: hash size is wrong";
 	}
-#endif
+	return ho;
+}
+
+static struct _auth_chunk
+token_key(const unsigned char *challenge, const int challengesize)
+{
+	struct _auth_chunk ho = {0};
+	long rc;
+	int keysize = sizeof(ho.data);
+
+	if ((rc = pcsc_cr(challenge, challengesize, ho.data, &keysize))) {
+		ho.err = pcsc_errstr(rc);
+	}
 	return ho;
 }
 
@@ -41,14 +49,21 @@ int main(int argc, char *argv[])
 	int i;
 	struct _auth_obj ao;
 	struct _auth_obj nao;
+	struct _auth_chunk (*fetch_key)(const unsigned char *challenge,
+					const int challengesize);
 
 	if (argc == 2 && strlen(argv[1]) == 40 &&
 			strspn(argv[1], "0123456789abcdefABCDEF") == 40) {
 		for (i = 0; i < sizeof(secret); i++)
 			sscanf(&argv[1][i*2], "%2hhx", &secret[i]);
+		fetch_key = token_key;
+	} else {
+		fetch_key = conjure_key;
 	}
-	ao = new_authobj(id, pass, nonce, secret, sizeof(secret),
-			payload, strlen((char *)payload));
+
+	ao = authobj(id, pass, NULL, nonce, secret, sizeof(secret),
+			payload, strlen((char *)payload),
+			NULL, 0, NULL);
 	printf("new_authobj err=%s\n", ao.err?ao.err:"<no error>");
 	printf("data(%d):", ao.datasize);
 	for (i = 0; i < ao.datasize; i++) printf(" %02x", ao.data[i]);
@@ -59,7 +74,8 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	nao = verify_authobj(id, pass, nonce, nonce, ao.data, ao.datasize);
+	nao = authobj(id, pass, nonce, nonce, NULL, 0, NULL, 0,
+			ao.data, ao.datasize, fetch_key);
 	printf("verify_authobj err=%s\n", nao.err?nao.err:"<no error>");
 	printf("data(%d):", nao.datasize);
 	for (i = 0; i < nao.datasize; i++) printf(" %02x", nao.data[i]);
