@@ -1,11 +1,14 @@
 #ifndef _AUTHFILE_H
 #define _AUTHFILE_H
 
-int eprint(const char *format, ...);	/* must be provided by the caller */
+void authfile_template(char *template);
 
-int update_authfile(const char *fn, const char *tokenid, const char *id,
-		const char *password, const char *nonce,
+struct _auth_obj authfile(const char *tokenid,
+		const char *userid, const char *password,
+		void (*update_nonce)(char *nonce, const int nonsize),
 		const unsigned char *secret, const int secsize,
-		const unsigned char *payload, const int paysize);
+		const unsigned char *payload, const int paysize,
+		struct _auth_chunk (*fetch_key)(const unsigned char *chal,
+						const int csize));
 
 #endif
