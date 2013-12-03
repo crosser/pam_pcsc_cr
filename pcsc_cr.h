@@ -1,8 +1,9 @@
 #ifndef _PCSC_CR_H
 #define _PCSC_CR_H
 
-int pcsc_option(char *option);
-long pcsc_cr(unsigned char *chal, int csize, unsigned char *resp, int *rsize);
+int pcsc_option(const char *option);
+long pcsc_cr(const unsigned char *chal, const int csize,
+		unsigned char *resp, int *rsize);
 char *pcsc_errstr(long err);
 
 #endif

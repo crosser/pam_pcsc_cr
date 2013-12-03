@@ -37,7 +37,8 @@ static LONG find_hb(BYTE *atr, DWORD atrsize, BYTE **hb, LPDWORD hbsize)
 	return SCARD_S_SUCCESS;
 }
 
-long pcsc_cr(unsigned char *chal, int csize, unsigned char *resp, int *rsize)
+long pcsc_cr(const unsigned char *chal, const int csize,
+		unsigned char *resp, int *rsize)
 {
 	struct token_interface *type;
 	LONG rc;
@@ -97,7 +98,7 @@ long pcsc_cr(unsigned char *chal, int csize, unsigned char *resp, int *rsize)
 	printf("Serial is %s\n", serial);
 #endif
 	lrsize = *rsize;
-	rc = type->trancieve(hCard, chal, csize, resp, &lrsize);
+	rc = type->trancieve(hCard, (BYTE*)chal, csize, resp, &lrsize);
 	if (rc) goto disc_free_out;
 	*rsize = lrsize;
 	rc = type->epilogue(hCard);
@@ -112,7 +113,7 @@ char *pcsc_errstr(long err) {
 	return pcsc_stringify_error(err);
 }
 
-int pcsc_option(char *option)
+int pcsc_option(const char *option)
 {
 	char *name, *key, *val;
 	int i, rc = -1;
