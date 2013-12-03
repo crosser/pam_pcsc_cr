@@ -33,27 +33,41 @@ void authfile_template(char *str)
 	template = str;
 }
 
-static char *make_path(const char *tokenid, const char *userid)
+static int path_size(const char *tokenid, const char *userid)
 {
 	const char *usub;
-	char *path;
 	char *p, *q;
 	struct passwd *pw;
 
-	if ((p = strchr(template, '~')) != strrchr(template, '~')) return NULL;
-	if ((q = strchr(template, '?')) != strrchr(template, '?')) return NULL;
-	if (p && !userid) return NULL;
-	if (q && !tokenid) return NULL;
+	if ((p = strchr(template, '~')) != strrchr(template, '~')) return 0;
+	if ((q = strchr(template, '?')) != strrchr(template, '?')) return 0;
+	if (p && !userid) return 0;
+	if (q && !tokenid) return 0;
 	if (p == template) {
 		pw = getpwnam(userid);
-		if (!pw) return NULL;
+		if (!pw) return 0;
 		usub = pw->pw_dir;
 	} else {
 		usub = userid;
 	}
-	path = malloc(strlen(template) + p?strlen(usub):0 +
-						q?strlen(tokenid):0 + 1);
-	if (!path) return NULL;
+	return strlen(template) + p?strlen(usub):0 + q?strlen(tokenid):0 + 1;
+}
+
+static void
+make_path(char * const path, const char *tokenid, const char *userid)
+{
+	const char *usub;
+	char *p, *q;
+	struct passwd *pw;
+
+	path[0] = '\0';
+	if (template[0] == '~') {
+		pw = getpwnam(userid);
+		if (!pw) return;
+		usub = pw->pw_dir;
+	} else {
+		usub = userid;
+	}
 	q = path;
 	for (p = template; *p; p++) switch (*p) {
 	case '~':
@@ -69,7 +83,6 @@ static char *make_path(const char *tokenid, const char *userid)
 		break;
 	}
 	*q = '\0';
-	return path;
 }
 
 struct _auth_obj authfile(const char *tokenid,
@@ -81,10 +94,12 @@ struct _auth_obj authfile(const char *tokenid,
 						const int csize))
 {
 	struct _auth_obj ret = {0};
+	mode_t oldmask;
 	FILE *fp = NULL;
 	char *fn;
+	int fnl;
 	char *buf = NULL;
-	const char *wtokenid = NULL, *wuserid = NULL, *wnonce = NULL;
+	const char *wtokenid = "", *wuserid = NULL, *wnonce = NULL;
 	const char *hablob = NULL;
 	unsigned char *ablob = NULL;
 	int blobsize = 0;
@@ -92,12 +107,13 @@ struct _auth_obj authfile(const char *tokenid,
 	int nonsize;
 	struct _auth_obj ao;
 
-	if ((fn = make_path(tokenid, userid)) == NULL) {
+	if ((fnl = path_size(tokenid, userid)) == 0) {
 		ret.err = "authfile path impossible to build";
 		return ret;
 	}
+	fn = alloca(fnl);
+	make_path(fn, tokenid, userid);
 	fp = fopen(fn, "r");
-	free(fn);
 	if (fp) {
 		struct stat st;
 		int fd = fileno(fp);
@@ -159,6 +175,7 @@ struct _auth_obj authfile(const char *tokenid,
 		return ret;
 	}
 
+	oldmask = umask(077);
 	if ((fp = fopen(fn, "w"))) {
 		int i;
 
@@ -176,6 +193,7 @@ struct _auth_obj authfile(const char *tokenid,
 	} else {
 		ret.err = strerror(errno);
 	}
+	(void)umask(oldmask);
 
 	if (!ret.err) {
 		int bufsize = (wuserid?strlen(wuserid)+1:0) + ao.paylsize;

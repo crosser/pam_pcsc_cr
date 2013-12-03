@@ -7,72 +7,89 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdarg.h>
+#include "authobj.h"
 #include "authfile.h"
 #include "pcsc_cr.h"
 
-int eprint(const char *format, ...)
+static struct _auth_chunk
+token_key(const unsigned char *challenge, const int challengesize)
 {
-	va_list ap;
-	char *nfmt;
+	struct _auth_chunk ho = {0};
+	long rc;
+	int keysize = sizeof(ho.data);
 
-	nfmt = alloca(strlen(format)+2);
-	strcpy(nfmt, format);
-	strcat(nfmt, "\n");
-	va_start(ap, format);
-	return vfprintf(stderr, nfmt, ap);
-	va_end(ap);
+	if ((rc = pcsc_cr(challenge, challengesize, ho.data, &keysize))) {
+		ho.err = pcsc_errstr(rc);
+	}
+	return ho;
 }
 
-static void usage(const char const *cmd)
+static char *mynonce = NULL;
+
+static void update_nonce(char *nonce, const int nonsize)
 {
-	eprint(	"usage: %s [options] [username]\n"
+	if (mynonce) {
+		snprintf(nonce, nonsize, "%s", mynonce);
+	} else {
+		int n = 0;
+
+		sscanf(nonce, "%d", &n);
+		snprintf(nonce, nonsize, "%d", n+1);
+	}
+}
+
+static void usage(const char * const cmd)
+{
+	fprintf(stderr,
+		"usage: %s [options] [username]\n"
 		"    -h                - show this help and exit\n"
 		"    -o backend-option - token option \"backend:key=val\"\n"
-		"    -f auth-file      - auth state file to read/write\n"
+		"    -f template       - template for auth state filepath\n"
 		"    -a secret | -A file-with-secret | -A -\n"
 		"                      - 40-character hexadecimal secret\n"
 		"    -s token-serial   - public I.D. of the token\n"
 		"    -n nonce          - initial nonce\n"
 		"    -l payload        - keyring unlock password\n"
-		"    -p password       - login password"
+		"    -p password       - login password\n"
+		"    -v                - show returned data\n"
 		, cmd);
 }
 
 int main(int argc, char *argv[])
 {
+	struct _auth_obj ao;
 	int c;
-	char *fn = NULL;
+	int verbose = 0;
 	char *hsecret = NULL;
 	char *secfn = NULL;
 	char secbuf[43];
 	unsigned char bsecret[20];
 	unsigned char *secret = NULL;
 	int i;
-	char *nonce = NULL;
 	char *tokenid = NULL;
-	char *id = getlogin();
-	char *payload = "";
+	char *userid = getlogin();
+	char *payload = NULL;
 	char *password = "";
 
-	while ((c = getopt(argc, argv, "ho:f:a:A:s:n:l:p:")) != -1)
+	while ((c = getopt(argc, argv, "ho:f:a:A:s:n:l:p:v")) != -1)
 	    switch (c) {
 	case 'h':
 		usage(argv[0]);
 		exit(EXIT_SUCCESS);
 	case 'o':
 		if (pcsc_option(optarg)) {
-			eprint("Option \"%s\" bad", optarg);
+			fprintf(stderr, "Option \"%s\" bad", optarg);
 			exit(EXIT_FAILURE);
 		}
 		break;
 	case 'f':
-		fn = optarg;
+		authfile_template(optarg);
 		break;
 	case 'a':
 		if (!secfn) {
 			hsecret = optarg;
 		} else {
-			eprint("-a and -A are mutually exclusive");
+			fprintf(stderr, "-a and -A are mutually exclusive");
 			exit(EXIT_FAILURE);
 		}
 		break;
@@ -80,7 +97,7 @@ int main(int argc, char *argv[])
 		if (!hsecret) {
 			secfn = optarg;
 		} else {
-			eprint("-A and -a are mutually exclusive");
+			fprintf(stderr, "-A and -a are mutually exclusive");
 			exit(EXIT_FAILURE);
 		}
 		break;
@@ -88,7 +105,7 @@ int main(int argc, char *argv[])
 		tokenid = optarg;
 		break;
 	case 'n':
-		nonce = optarg;
+		mynonce = optarg;
 		break;
 	case 'l':
 		payload = optarg;
@@ -96,16 +113,23 @@ int main(int argc, char *argv[])
 	case 'p':
 		password = optarg;
 		break;
+	case 'v':
+		verbose = 1;
+		break;
 	default:
 		usage(argv[0]);
 		exit(EXIT_FAILURE);
 	}
 	if (optind == (argc - 1)) {
-		id = argv[optind];
+		userid = argv[optind];
 		optind++;
 	}
 	if (optind != argc) {
 		usage(argv[0]);
+		exit(EXIT_FAILURE);
+	}
+	if (!userid) {
+		fprintf(stderr, "cannot determine userid");
 		exit(EXIT_FAILURE);
 	}
 	if (secfn) {
@@ -115,12 +139,12 @@ int main(int argc, char *argv[])
 		if (!strcmp(secfn, "-")) sfp = stdin;
 		else sfp = fopen(secfn, "r");
 		if (!sfp) {
-			eprint("cannot open \"%s\": %s",
+			fprintf(stderr, "cannot open \"%s\": %s",
 				secfn, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
 		if (!fgets(secbuf, sizeof(secbuf), sfp)) {
-			eprint("cannot read \"%s\": %s",
+			fprintf(stderr, "cannot read \"%s\": %s",
 				secfn, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
@@ -129,10 +153,6 @@ int main(int argc, char *argv[])
 
 		fclose(sfp);
 		hsecret = secbuf;
-	}
-	if (!id) {
-		eprint("cannot determine userid");
-		exit(EXIT_FAILURE);
 	}
 	if (hsecret) {
 		if (strlen(hsecret) != 40) {
@@ -149,7 +169,18 @@ int main(int argc, char *argv[])
 			sscanf(hsecret + i * 2, "%2hhx", &bsecret[i]);
 		secret = bsecret;
 	}
-	return update_authfile(fn, tokenid, id, password, nonce,
-				secret, sizeof(bsecret),
-				(unsigned char *)payload, strlen(payload));
+	ao = authfile(tokenid, userid, password, update_nonce,
+			secret, secret ? sizeof(bsecret) : 0,
+			(unsigned char *)payload, payload ? strlen(payload) : 0,
+			token_key);
+	memset(bsecret, 0, sizeof(bsecret));
+	if (ao.err) {
+		fprintf(stderr, "%s\n", ao.err);
+		exit(EXIT_FAILURE);
+	} else if (verbose) {
+		printf("userid : \"%.*s\"\n", ao.datasize, ao.data);
+		printf("payload: \"%.*s\"\n", ao.paylsize, ao.payload);
+	}
+	if (ao.buffer) free(ao.buffer);
+	return 0;
 }
