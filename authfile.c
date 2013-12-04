@@ -74,7 +74,7 @@ static int path_size(const char *tokenid, const char *userid)
 	} else {
 		usub = userid;
 	}
-	return strlen(template) + p?strlen(usub):0 + q?strlen(tokenid):0 + 1;
+	return strlen(template)+(p?strlen(usub):0)+(q?strlen(tokenid):0)+1;
 }
 
 static void

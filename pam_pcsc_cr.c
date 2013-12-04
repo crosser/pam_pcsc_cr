@@ -88,6 +88,7 @@ void parse_cfg(struct _cfg * const cfg, int argc, const char *argv[])
 	int i;
 
 	for (i = 0; i < argc; i++) {
+		if (cfg->verbose) syslog(LOG_DEBUG, "arg: \"%s\"", argv[i]);
 		if (strchr(argv[i],':') && strchr(argv[i],'='))
 			pcsc_option(argv[i]);
 		else if (!strcmp(argv[i], "verbose")) cfg->verbose = 1;
