@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <pwd.h>
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -109,7 +110,7 @@ struct _auth_obj authfile(const char *tokenid,
 	struct _auth_obj ret = {0};
 	mode_t oldmask;
 	FILE *fp = NULL;
-	char *fn;
+	char *fn, *nfn;
 	int fnl;
 	char *buf = NULL;
 	struct {
@@ -130,6 +131,8 @@ struct _auth_obj authfile(const char *tokenid,
 	}
 	fn = alloca(fnl);
 	make_path(fn, tokenid, userid);
+	nfn = alloca(fnl+32);
+	snprintf(nfn, fnl+32, "%s.%d.%ld", fn, (int)getpid(), (long)time(NULL));
 	fp = fopen(fn, "r");
 	if (fp) {
 		struct stat st;
@@ -187,7 +190,7 @@ struct _auth_obj authfile(const char *tokenid,
 	}
 
 	oldmask = umask(077);
-	if ((fp = fopen(fn, "w"))) {
+	if ((fp = fopen(nfn, "w"))) {
 		int i;
 
 		if (fprintf(fp, "%s:%s:%s:", tokenid?tokenid:w.tokenid,
@@ -205,6 +208,11 @@ struct _auth_obj authfile(const char *tokenid,
 		ret.err = strerror(errno);
 	}
 	(void)umask(oldmask);
+	if (ret.err) {
+		unlink(nfn); /* may not exist but no matter */
+	} else if (rename(nfn, fn)) {
+		ret.err = strerror(errno);
+	}
 
 	if (!ret.err) {
 		int bufsize = (w.userid?strlen(w.userid)+1:0) + ao.paylsize;
