@@ -85,6 +85,19 @@ make_path(char * const path, const char *tokenid, const char *userid)
 	*q = '\0';
 }
 
+int parse(char * const buf, const int argc, const char *argv[const])
+{
+	char *p, *q;
+	int i;
+
+	for (i = 0, p = buf; *p; p = q+1, i++) {
+		for (q = p; *q && *q != ':' && *q != '\r' && *q != '\n'; q++) ;
+		*q = '\0';
+		if (*p && i < argc) argv[i] = p;
+	}
+	return i != argc;
+}
+
 struct _auth_obj authfile(const char *tokenid,
 		const char *userid, const char *password,
 		void (*update_nonce)(char *nonce, const int nonsize),
@@ -99,8 +112,12 @@ struct _auth_obj authfile(const char *tokenid,
 	char *fn;
 	int fnl;
 	char *buf = NULL;
-	const char *wtokenid = "", *wuserid = NULL, *wnonce = NULL;
-	const char *hablob = NULL;
+	struct {
+		const char *tokenid;
+		const char *userid;
+		const char *nonce;
+		const char *hablob;
+	} w = {"", NULL, NULL, NULL};
 	unsigned char *ablob = NULL;
 	int blobsize = 0;
 	char *newnonce;
@@ -121,28 +138,22 @@ struct _auth_obj authfile(const char *tokenid,
 		if (fstat(fd, &st)) st.st_size = 2047;
 		if (st.st_size > 2047) st.st_size = 2047;
 		buf = alloca(st.st_size + 1);
-		if (fgets(buf, st.st_size + 1, fp)) {
-			char *p;
-
-			p = &buf[strlen(buf) - 1];
-			while (*p == '\n' || *p == '\r') *p-- = '\0';
-			wtokenid = strtok(buf, ":");
-			wuserid = strtok(NULL, ":");
-			wnonce = strtok(NULL, ":");
-			hablob = strtok(NULL, ":");
-		} else {
+		if (!fgets(buf, st.st_size + 1, fp)) {
 			ret.err = strerror(errno);
+		} else if (parse(buf, sizeof(w)/sizeof(char*),
+					(const char ** const)&w)){
+			ret.err = "error: unparseable auth file";
 		}
 		fclose(fp);
 	}
 	if (ret.err) return ret;
 
-	if (hablob) {
-		int hlen = strlen(hablob);
+	if (w.hablob) {
+		int hlen = strlen(w.hablob);
 		if (hlen % 32 != 0) {
 			ret.err = "error: auth string has wrong length";
 		} else if (hlen !=
-				strspn(hablob, "0123456789abcdefABCDEF")) {
+				strspn(w.hablob, "0123456789abcdefABCDEF")) {
 			ret.err = "error: auth string not hexadecimal";
 		} else {
 			int i;
@@ -150,20 +161,20 @@ struct _auth_obj authfile(const char *tokenid,
 			blobsize = hlen/2;
 			ablob = alloca(blobsize);
 			for (i = 0; i < blobsize; i++)
-				sscanf(&hablob[i*2], "%2hhx", &ablob[i]);
+				sscanf(&w.hablob[i*2], "%2hhx", &ablob[i]);
 		}
 	}
 	if (ret.err) return ret;
 
-	nonsize = wnonce ? strlen(wnonce)*2 : 32;
+	nonsize = w.nonce ? strlen(w.nonce)*2 : 32;
 	if (nonsize < 32) nonsize = 32;
 	newnonce = alloca(nonsize);
-	if (wnonce) strcpy(newnonce, wnonce);
+	if (w.nonce) strcpy(newnonce, w.nonce);
 	else memset(newnonce, 0, nonsize);
 	update_nonce(newnonce, nonsize);
 
-	ao = authobj(userid?userid:wuserid, password,
-			wnonce, newnonce, secret, secsize,
+	ao = authobj(userid?userid:w.userid, password,
+			w.nonce, newnonce, secret, secsize,
 			payload, paylsize, ablob, blobsize,
 			fetch_key);
 
@@ -179,8 +190,8 @@ struct _auth_obj authfile(const char *tokenid,
 	if ((fp = fopen(fn, "w"))) {
 		int i;
 
-		if (fprintf(fp, "%s:%s:%s:", tokenid?tokenid:wtokenid,
-				userid?userid:wuserid, newnonce) < 0) {
+		if (fprintf(fp, "%s:%s:%s:", tokenid?tokenid:w.tokenid,
+				userid?userid:w.userid, newnonce) < 0) {
 			ret.err = strerror(errno);
 		} else for (i = 0; i < ao.datasize; i++)
 		    if (fprintf(fp, "%02x", ao.data[i]) < 0) {
@@ -196,17 +207,17 @@ struct _auth_obj authfile(const char *tokenid,
 	(void)umask(oldmask);
 
 	if (!ret.err) {
-		int bufsize = (wuserid?strlen(wuserid)+1:0) + ao.paylsize;
+		int bufsize = (w.userid?strlen(w.userid)+1:0) + ao.paylsize;
 		if (bufsize) {
 			if ((ret.buffer = malloc(bufsize)) == NULL) {
 				ret.err = "authfile malloc failed";
 			} else {
 				unsigned char *p = ret.buffer;
-				if (wuserid) {
-					strcpy((char*)p, wuserid);
+				if (w.userid) {
+					strcpy((char*)p, w.userid);
 					ret.data = p;
-					ret.datasize = strlen(wuserid)+1;
-					p += strlen(wuserid)+1;
+					ret.datasize = strlen(w.userid)+1;
+					p += strlen(w.userid)+1;
 				}
 				if (ao.payload) {
 					memcpy(p, ao.payload, ao.paylsize);
