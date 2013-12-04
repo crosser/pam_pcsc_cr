@@ -3,6 +3,9 @@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 
+libdir = $(PAMDIR)
+DEFS = -DDEBUG_PAM -DPAM_DEBUG @DEFS@
+
 noinst_HEADERS = pcsc_cr.h token.h crypto_if.h crypto.h serial.h authobj.h \
 		authfile.h
 

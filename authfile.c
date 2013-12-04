@@ -215,7 +215,7 @@ struct _auth_obj authfile(const char *tokenid,
 	}
 
 	if (!ret.err) {
-		int bufsize = (w.userid?strlen(w.userid)+1:0) + ao.paylsize;
+		int bufsize = (w.userid?strlen(w.userid)+1:0) + ao.paylsize + 1;
 		if (bufsize) {
 			if ((ret.buffer = malloc(bufsize)) == NULL) {
 				ret.err = "authfile malloc failed";
@@ -229,8 +229,9 @@ struct _auth_obj authfile(const char *tokenid,
 				}
 				if (ao.payload) {
 					memcpy(p, ao.payload, ao.paylsize);
+					p[ao.paylsize] = '\0';
 					ret.payload = p;
-					ret.paylsize = ao.paylsize;
+					ret.paylsize = ao.paylsize+1;
 				}
 			}
 		}

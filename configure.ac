@@ -19,6 +19,22 @@ AC_PROG_INSTALL
 AM_PROG_LIBTOOL
 PKG_PROG_PKG_CONFIG
 
+AC_CHECK_HEADERS([security/pam_appl.h], [], [
+  AC_MSG_ERROR([[PAM headers not found]])
+])
+AC_CHECK_HEADERS([security/pam_modules.h security/_pam_macros.h \
+		  security/pam_modutil.h], [], [], [
+#include <sys/types.h>
+#include <security/pam_appl.h>
+])
+AC_CHECK_LIB([pam], [pam_start])
+AC_CHECK_FUNCS([pam_modutil_drop_priv])
+AC_SUBST(PAMDIR, "\$(exec_prefix)/lib/security")
+AC_ARG_WITH(pam-dir,
+	[  --with-pam-dir=DIR                path to install PAM module],
+	[PAMDIR="$withval"],
+	[])
+
 PKG_CHECK_MODULES([PCSC], [libpcsclite])
 AC_ARG_WITH(pcsclite-include-path,
 	[  --with-pcsclite-include-path=PATH path to pcsclite includes],
