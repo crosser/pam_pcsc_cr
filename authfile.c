@@ -27,9 +27,9 @@
  * string.
  */
 
-static char *template = "~/.pam_cr/auth";
+static const char *template = "~/.pam_cr/auth";
 
-void authfile_template(char *str)
+void authfile_template(const char *str)
 {
 	template = str;
 }
@@ -37,7 +37,7 @@ void authfile_template(char *str)
 static int path_size(const char *tokenid, const char *userid)
 {
 	const char *usub;
-	char *p, *q;
+	const char *p, *q;
 	struct passwd *pw;
 
 	if ((p = strchr(template, '~')) != strrchr(template, '~')) return 0;
@@ -58,7 +58,8 @@ static void
 make_path(char * const path, const char *tokenid, const char *userid)
 {
 	const char *usub;
-	char *p, *q;
+	const char *p;
+	char *q;
 	struct passwd *pw;
 
 	path[0] = '\0';

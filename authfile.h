@@ -1,7 +1,7 @@
 #ifndef _AUTHFILE_H
 #define _AUTHFILE_H
 
-void authfile_template(char *template);
+void authfile_template(const char *template);
 
 struct _auth_obj authfile(const char *tokenid,
 		const char *userid, const char *password,

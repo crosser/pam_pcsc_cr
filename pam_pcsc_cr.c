@@ -57,6 +57,7 @@ static void update_nonce(char *nonce, const int nonsize)
 struct _cfg {
 	int noaskpass;
 	int verbose;
+	int injectauth;
 };
 
 void parse_cfg(struct _cfg * const cfg, int argc, const char *argv[])
@@ -68,6 +69,9 @@ void parse_cfg(struct _cfg * const cfg, int argc, const char *argv[])
 			pcsc_option(argv[i]);
 		else if (!strcmp(argv[i], "verbose")) cfg->verbose = 1;
 		else if (!strcmp(argv[i], "noaskpass")) cfg->noaskpass = 1;
+		else if (!strcmp(argv[i], "injectauth")) cfg->injectauth = 1;
+		else if (!strncmp(argv[i], "path=", 5))
+					authfile_template(argv[i]+5);
 	}
 }
 
@@ -87,7 +91,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags,
 	if ((pam_err = pam_get_user(pamh, &user, NULL)) != PAM_SUCCESS) {
 		if (cfg.verbose) syslog(LOG_ERR, "get_user failed: %s",
 					pam_strerror(pamh, pam_err));
-		return (pam_err);
+		return pam_err;
 	}
 	if (strspn(user, "0123456789") == strlen(user)) {
 		tokenid = user;
@@ -135,7 +139,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags,
 	} else {
 		if (!user)
 			pam_set_item(pamh, PAM_USER, ao.data);
-		if (ao.payload && ao.payload[0])
+		if (cfg.injectauth && ao.payload && ao.payload[0])
 			pam_set_item(pamh, PAM_AUTHTOK, ao.payload);
 		return PAM_SUCCESS;
 	}
