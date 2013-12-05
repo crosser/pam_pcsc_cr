@@ -136,6 +136,7 @@ struct _auth_obj authfile(const char *tokenid,
 	FILE *fp = NULL;
 	char *fn, *nfn;
 	int fnl;
+	struct stat st = {0};
 	char *buf = NULL;
 	struct {
 		const char *tokenid;
@@ -159,10 +160,7 @@ struct _auth_obj authfile(const char *tokenid,
 	snprintf(nfn, fnl+32, "%s.%d.%ld", fn, (int)getpid(), (long)time(NULL));
 	fp = fopen(fn, "r");
 	if (fp) {
-		struct stat st;
-		int fd = fileno(fp);
-
-		if (fstat(fd, &st)) st.st_size = 2047;
+		if (fstat(fileno(fp), &st)) st.st_size = 2047;
 		if (st.st_size > 2047) st.st_size = 2047;
 		buf = alloca(st.st_size + 1);
 		if (!fgets(buf, st.st_size + 1, fp)) {
@@ -225,6 +223,9 @@ struct _auth_obj authfile(const char *tokenid,
 			ret.err = strerror(errno);
 		}
 		fprintf(fp, "\n");
+		if (st.st_uid || st.st_gid) {
+			(void)fchown(fileno(fp), st.st_uid, st.st_gid);
+		}
 		if (fclose(fp) < 0) {
 			ret.err = strerror(errno);
 		}
