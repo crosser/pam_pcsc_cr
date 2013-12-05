@@ -29,7 +29,7 @@ test_serial_LDADD = libpcsc_cr.la
 test_crypto_LDADD = libpcsc_cr.la
 test_chalresp_LDADD = libpcsc_cr.la
 
-EXTRA_DIST = autogen.sh README_CR
+EXTRA_DIST = autogen.sh README.md README_CR
 
 TESTS = test_auth test_serial test_crypto test_chalresp
 XFAIL_TESTS = test_chalresp
