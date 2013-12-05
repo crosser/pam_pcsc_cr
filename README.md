@@ -1,3 +1,4 @@
+% Challenge-Response PAM Module
 
 ```
 Copyright (c) 2013 Eugene Crosser
