@@ -25,7 +25,7 @@ freely, subject to the following restrictions:
 
 ------------------------------------------------------------------------
 
-# Challenge-Response PAM Module for HMAC-SHA1 Hardware Token(s)
+## Challenge-Response PAM Module for HMAC-SHA1 Hardware Token(s)
 
 This package provides a UNIX
 [PAM](http://en.wikipedia.org/wiki/Pluggable_Authentication_Modules)
