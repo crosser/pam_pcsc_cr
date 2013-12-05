@@ -135,9 +135,10 @@ PAM module has the following parameters:
 
 ## Getting the Source
 
+Note that as of December 2013, this is a work in progress. You can
 [clone](git://git.average.org/git/pam_pcsc_cr.git) or
 [browse](http://www.average.org/gitweb/?p=pam_pcsc_cr.git;a=summary)
-the repo.
+the git repo.
 
 ## Author
 
