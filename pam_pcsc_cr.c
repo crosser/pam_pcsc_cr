@@ -47,6 +47,9 @@ freely, subject to the following restrictions:
 #ifdef HAVE_SECURITY_PAM_MODULES_H
 # include <security/pam_modules.h>
 #endif
+#ifdef HAVE_SECURITY_PAM_EXT_H
+# include <security/pam_ext.h>
+#endif
 
 #ifndef PAM_EXTERN
 # ifdef PAM_STATIC
@@ -54,6 +57,56 @@ freely, subject to the following restrictions:
 # else
 #  define PAM_EXTERN extern
 # endif
+#endif
+
+struct _cfg {
+	int noaskpass;
+	int verbose;
+	int injectauth;
+};
+
+#ifndef HAVE_PAM_GET_AUTHTOK
+static int pam_get_authtok(pam_handle_t *pamh, int item, const char **authtok,
+			const char *prompt)
+{
+	struct _cfg dfl_cfg = {0};
+	struct _cfg *cfg = &dfl_cfg;
+	struct pam_conv *conv;
+	struct pam_message msg;
+	const struct pam_message *msgp;
+	struct pam_response *resp;
+	int pam_err;
+
+	(void)pam_get_data(pamh, "pcsc_cr_cfg_struct", (const void **)&cfg);
+
+	if ((pam_err = pam_get_item(pamh, PAM_AUTHTOK,
+					(const void **)authtok))) {
+		if (cfg->verbose) syslog(LOG_ERR,
+					"get_item(PAM_AUTHTOK) failed: %s",
+					pam_strerror(pamh, pam_err));
+	} else {
+		if (*authtok) return PAM_SUCCESS;
+	}
+
+	if ((pam_err = pam_get_item(pamh, PAM_CONV,
+				(const void **)&conv))) {
+		if (cfg->verbose) syslog(LOG_ERR,
+				"get_item(PAM_CONV) failed: %s",
+				pam_strerror(pamh, pam_err));
+		return pam_err;
+	}
+	msg.msg_style = PAM_PROMPT_ECHO_OFF;
+	msg.msg = prompt;
+	msgp = &msg;
+	resp = NULL;
+	pam_err =  (*conv->conv)(1, &msgp, &resp, conv->appdata_ptr);
+	if (resp != NULL) {
+		if (pam_err == PAM_SUCCESS) *authtok = resp->resp;
+		else free(resp->resp);
+		free(resp);
+	}
+	return pam_err;
+}
 #endif
 
 static struct _auth_chunk
@@ -76,12 +129,6 @@ static void update_nonce(char *nonce, const int nonsize)
 	sscanf(nonce, "%d", &n);
 	snprintf(nonce, nonsize, "%d", n+1);
 }
-
-struct _cfg {
-	int noaskpass;
-	int verbose;
-	int injectauth;
-};
 
 void parse_cfg(struct _cfg * const cfg, int argc, const char *argv[])
 {
@@ -111,6 +158,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags,
 	int pam_err;
 
 	parse_cfg(&cfg, argc, argv);
+	(void)pam_set_data(pamh, "pcsc_cr_cfg_struct", &cfg, NULL);
 
 	if ((pam_err = pam_get_user(pamh, &user, NULL)) != PAM_SUCCESS) {
 		if (cfg.verbose) syslog(LOG_ERR, "get_user failed: %s",
@@ -123,34 +171,14 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags,
 	}
 
 	if (!cfg.noaskpass) {
-#ifdef _OPENPAM
-		pam_err = pam_get_authtok(pamh, PAM_AUTHTOK,
-					(const char **)&password, NULL);
-#else
-		struct pam_conv *conv;
-		struct pam_message msg;
-		const struct pam_message *msgp;
-		struct pam_response *resp;
-
-		if ((pam_err = pam_get_item(pamh, PAM_CONV,
-					(const void **)&conv))) {
+		if ((pam_err = pam_get_authtok(pamh, PAM_AUTHTOK,
+					(const char **)&password,
+					"Token password:"))) {
 			if (cfg.verbose) syslog(LOG_ERR,
-					"get_item failed: %s",
-					pam_strerror(pamh, pam_err));
+						"get_authtok failed: %s",
+						pam_strerror(pamh, pam_err));
 			return pam_err;
 		}
-		msg.msg_style = PAM_PROMPT_ECHO_OFF;
-		msg.msg = "Token password:";
-		msgp = &msg;
-		resp = NULL;
-		pam_err =  (*conv->conv)(1, &msgp, &resp, conv->appdata_ptr);
-		if (resp != NULL) {
-			if (pam_err == PAM_SUCCESS) password = resp->resp;
-			else free(resp->resp);
-			free(resp);
-		}
-#endif
-		if (pam_err) return pam_err;
 	} else {
 		password = "";
 	}
@@ -205,7 +233,7 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags,
 }
 
 #ifdef PAM_MODULE_ENTRY
-PAM_MODULE_ENTRY("pam_unix");
+PAM_MODULE_ENTRY("pam_pcsc_cr");
 #endif
 
 #ifdef PAM_STATIC

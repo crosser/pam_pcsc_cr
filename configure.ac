@@ -22,14 +22,13 @@ PKG_PROG_PKG_CONFIG
 AC_CHECK_HEADERS([security/pam_appl.h], [], [
   AC_MSG_ERROR([[PAM headers not found]])
 ])
-AC_CHECK_HEADERS([security/pam_modules.h security/_pam_macros.h \
-		  security/pam_modutil.h], [], [], [
+AC_CHECK_HEADERS([security/pam_modules.h security/pam_ext.h], [], [], [
 #include <sys/types.h>
 #include <security/pam_appl.h>
 ])
 AC_CHECK_LIB([pam], [pam_start])
-AC_CHECK_FUNCS([pam_modutil_drop_priv])
-AC_SUBST(PAMDIR, "\$(exec_prefix)/lib/security")
+AC_CHECK_FUNCS([pam_get_authtok])
+AC_SUBST(PAMDIR, "/lib/security")
 AC_ARG_WITH(pam-dir,
 	[  --with-pam-dir=DIR                path to install PAM module],
 	[PAMDIR="$withval"],
