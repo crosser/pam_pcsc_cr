@@ -24,6 +24,7 @@ freely, subject to the following restrictions:
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <alloca.h>
@@ -96,7 +97,7 @@ static DWORD ykn_getserial(SCARDHANDLE hCard, BYTE *recv, LPDWORD recvsize_p)
 	if ((rbuf[rsize-2] != 0x90) || (rbuf[rsize-1] != 0x00))
 		return SCARD_W_CARD_NOT_AUTHENTICATED;
 	serial = (rbuf[0]<<24) + (rbuf[1]<<16) + (rbuf[2]<<8) + (rbuf[3]);
-	rc = snprintf(recv, *recvsize_p, "%u", serial);
+	rc = snprintf((char*)recv, *recvsize_p, "%u", serial);
 	*recvsize_p = rc;
 	return SCARD_S_SUCCESS;
 }
