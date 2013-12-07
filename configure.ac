@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([pam_pcsc_cr], 0.0.1)
+AC_INIT([pam_pcsc_cr], 0.9.0)
 AC_CONFIG_SRCDIR([pam_pcsc_cr.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
@@ -28,34 +28,23 @@ AC_CHECK_HEADERS([security/pam_modules.h security/pam_ext.h], [], [], [
 ])
 AC_CHECK_LIB([pam], [pam_start])
 AC_CHECK_FUNCS([pam_get_authtok])
-AC_SUBST(PAMDIR, "/lib/security")
 AC_ARG_WITH(pam-dir,
-	[  --with-pam-dir=DIR                path to install PAM module],
+	[  --with-pam-dir=DIR      path to install the PAM module (/lib/security)],
 	[PAMDIR="$withval"],
-	[])
+	[
+case $prefix in
+*/_inst) PAMDIR='${exec_prefix}/lib/security' ;;
+*)       PAMDIR=/lib/security ;;
+esac
+])
+AC_SUBST(PAMDIR)
+AC_MSG_NOTICE([Installation target PAMDIR=${PAMDIR}])
 
 PKG_CHECK_MODULES([PCSC], [libpcsclite])
-AC_ARG_WITH(pcsclite-include-path,
-	[  --with-pcsclite-include-path=PATH path to pcsclite includes],
-	[PCSC_CFLAGS="-I $withval"],
-	[])
-AC_ARG_WITH(pcsclite-lib-path,
-	[  --with-pcsclite-lib-path=PATH path to pcsclite libs],
-	[PCSC_LIBS="-L $withval -lpcsclite"],
-	[])
-
 CPPFLAGS="$PCSC_CFLAGS $CPPFLAGS"
 LIBS="$PCSC_LIBS $LIBS"
 
 PKG_CHECK_MODULES([OPENSSL], [libcrypto], [], [:])
-AC_ARG_WITH(openssl-include-path,
-	[  --with-openssl-include-path=PATH path to openssl includes],
-	[OPENSSL_CFLAGS="-I $withval"],
-	[])
-AC_ARG_WITH(openssl-lib-path,
-	[  --with-openssl-lib-path=PATH path to openssl libs],
-	[OPENSSL_LIBS="-L $withval -lcrypto"],
-	[])
 AS_IF([test "x$OPENSSL_CFLAGS" != "x" -o "x$OPENSSL_LIBS" != "x" ], [
   use_openssl=yes
 ])
@@ -63,19 +52,11 @@ CPPFLAGS="$OPENSSL_CFLAGS $CPPFLAGS"
 LIBS="$OPENSSL_LIBS $LIBS"
 
 AC_ARG_ENABLE(tomcrypt,
-	[  --enable-tomcrypt       use libtomcrypt even when openssl present])
+	[  --enable-tomcrypt       use libtomcrypt even when openssl is present])
 
 AS_IF([test "x$use_openssl" != "xyes" -o "x$enable_tomcrypt" = "xyes"], [
   PKG_CHECK_MODULES([TOMCRYPT], [libtomcrypt], [], [:])
 ])
-AC_ARG_WITH(libtomcrypt-include-path,
-	[  --with-libtomcrypt-include-path=PATH path to libtomcrypt includes],
-	[TOMCRYPT_CFLAGS="-I $withval"],
-	[])
-AC_ARG_WITH(libtomcrypt-lib-path,
-	[  --with-libtomcrypt-lib-path=PATH path to libtomcrypt libs],
-	[TOMCRYPT_LIBS="-L $withval -ltomcrypt"],
-	[])
 AS_IF([test "x$TOMCRYPT_CFLAGS" != "x" -o "x$TOMCRYPT_LIBS" != "x" ], [
   use_tomcrypt=yes
 ])
@@ -83,20 +64,13 @@ CPPFLAGS="$TOMCRYPT_CFLAGS $CPPFLAGS"
 LIBS="$TOMCRYPT_LIBS $LIBS"
 
 AC_ARG_ENABLE(gcrypt,
-	[  --enable-gcrypt         use libgcrypt even when openssl present])
+	[  --enable-gcrypt         use libgcrypt even when openssl or libtomcrypt
+                          is present])
 
 AS_IF([test "x$use_openssl" != "xyes" && test "x$use_tomcrypt" != "xyes" || \
 	test "x$enable_tomcrypt" = "xyes"], [
   AM_PATH_LIBGCRYPT()
 ])
-AC_ARG_WITH(libgcrypt-include-path,
-	[  --with-libgcrypt-include-path=PATH path to libgcrypt includes],
-	[LIBGCRYPT_CFLAGS="-I $withval"],
-	[])
-AC_ARG_WITH(libgcrypt-lib-path,
-	[  --with-libgcrypt-lib-path=PATH path to libgcrypt libs],
-	[LIBGCRYPT_LIBS="-L $withval -lgcrypt"],
-	[])
 AS_IF([test "x$LIBGCRYPT_CFLAGS" != "x" -o "x$LIBGCRYPT_LIBS" != "x" ], [
   use_gcrypt=yes
 ])
