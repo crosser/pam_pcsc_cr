@@ -42,7 +42,7 @@ static struct crypto_interface *ifs[] = {
 #ifdef HAVE_GCRYPT
 	&gnu_crypto_if,
 #endif
-	(void*)0,
+	(struct crypto_interface *)0,
 };
 #define MAX_IF (sizeof(ifs)/sizeof(struct crypto_interface *)-2)
 

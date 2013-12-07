@@ -36,8 +36,8 @@ static const char *gnu_init(void)
 	return "gcrypt";
 }
 
-static unsigned long gnu_encrypt(void *key, int keylen, void *iv,
-			void *pt, void *ct, int tlen)
+static unsigned long gnu_encrypt(const void *key, const int keylen, void *iv,
+			const void *pt, void *ct, const int tlen)
 {
 	gcry_error_t err;
 	gcry_cipher_hd_t hd;
@@ -56,8 +56,8 @@ static unsigned long gnu_encrypt(void *key, int keylen, void *iv,
 	return 0UL;
 }
 
-static unsigned long gnu_decrypt(void *key, int keylen, void *iv,
-			void *ct, void *pt, int tlen)
+static unsigned long gnu_decrypt(const void *key, const int keylen, void *iv,
+			const void *ct, void *pt, const int tlen)
 {
 	gcry_error_t err;
 	gcry_cipher_hd_t hd;
@@ -76,7 +76,8 @@ static unsigned long gnu_decrypt(void *key, int keylen, void *iv,
 	return 0UL;
 }
 
-static unsigned long gnu_hash(void *pt, int tlen, void *tag, int *taglen)
+static unsigned long gnu_hash(const void *pt, const int tlen,
+			void *tag, int *taglen)
 {
 	gcry_error_t err;
 	gcry_md_hd_t hd;
@@ -94,7 +95,8 @@ static unsigned long gnu_hash(void *pt, int tlen, void *tag, int *taglen)
 	return 0UL;
 }
 
-static unsigned long gnu_hmac(void *key, int keylen, void *pt, int tlen,
+static unsigned long gnu_hmac(const void *key, const int keylen,
+			const void *pt, const int tlen,
 			void *tag, int *taglen)
 {
 	gcry_error_t err;
@@ -116,7 +118,7 @@ static unsigned long gnu_hmac(void *key, int keylen, void *pt, int tlen,
 	return 0UL;
 }
 
-static const char *gnu_errstr(unsigned long err)
+static const char *gnu_errstr(const unsigned long err)
 {
 	return gcry_strerror((gcry_error_t)err);
 }

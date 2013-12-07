@@ -26,14 +26,16 @@ freely, subject to the following restrictions:
 
 struct crypto_interface {
 	const char *(*init)(void);
-	unsigned long (*encrypt)(void *key, int keylen, void *iv,
-				void *pt, void *ct, int tlen);
-	unsigned long (*decrypt)(void *key, int keylen, void *iv,
-				void *ct, void *pt, int tlen);
-	unsigned long (*hash)(void *pt, int tlen, void *tag, int *taglen);
-	unsigned long (*hmac)(void *key, int keylen,
-				void *pt, int tlen, void *tag, int *taglen);
-	const char *(*errstr)(unsigned long err);
+	unsigned long (*encrypt)(const void *key, const int keylen, void *iv,
+				const void *pt, void *ct, const int tlen);
+	unsigned long (*decrypt)(const void *key, const int keylen, void *iv,
+				const void *ct, void *pt, const int tlen);
+	unsigned long (*hash)(const void *pt, const int tlen,
+				void *tag, int *taglen);
+	unsigned long (*hmac)(const void *key, const int keylen,
+				const void *pt, const int tlen,
+				void *tag, int *taglen);
+	const char *(*errstr)(const unsigned long err);
 };
 
 #endif

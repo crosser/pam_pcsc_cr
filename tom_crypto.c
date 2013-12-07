@@ -34,8 +34,8 @@ static const char *tom_init(void)
 	return "tomcrypt";
 }
 
-static unsigned long tom_encrypt(void *key, int keylen, void *iv,
-			void *pt, void *ct, int tlen)
+static unsigned long tom_encrypt(const void *key, const int keylen, void *iv,
+			const void *pt, void *ct, const int tlen)
 {
 	symmetric_CBC cbc;
 	int index, err;
@@ -49,8 +49,8 @@ static unsigned long tom_encrypt(void *key, int keylen, void *iv,
 	return err;
 }
 
-static unsigned long tom_decrypt(void *key, int keylen, void *iv,
-			void *ct, void *pt, int tlen)
+static unsigned long tom_decrypt(const void *key, const int keylen, void *iv,
+			const void *ct, void *pt, const int tlen)
 {
 	symmetric_CBC cbc;
 	int index, err;
@@ -64,7 +64,8 @@ static unsigned long tom_decrypt(void *key, int keylen, void *iv,
 	return err;
 }
 
-static unsigned long tom_hash(void *pt, int tlen, void *tag, int *taglen)
+static unsigned long tom_hash(const void *pt, const int tlen,
+			void *tag, int *taglen)
 {
 	int index, rc;
 	unsigned long ltaglen = *taglen;
@@ -76,8 +77,9 @@ static unsigned long tom_hash(void *pt, int tlen, void *tag, int *taglen)
 	return rc;
 }
 
-static unsigned long tom_hmac(void *key, int keylen,
-			void *pt, int tlen, void *tag, int *taglen)
+static unsigned long tom_hmac(const void *key, const int keylen,
+			const void *pt, const int tlen,
+			void *tag, int *taglen)
 {
 	int index, rc;
 	unsigned long ltaglen = *taglen;
@@ -89,7 +91,7 @@ static unsigned long tom_hmac(void *key, int keylen,
 	return rc;
 }
 
-static const char *tom_errstr(unsigned long err)
+static const char *tom_errstr(const unsigned long err)
 {
 	return error_to_string((int)err);
 }
