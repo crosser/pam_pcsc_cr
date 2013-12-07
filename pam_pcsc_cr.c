@@ -135,14 +135,19 @@ void parse_cfg(struct _cfg * const cfg, int argc, const char *argv[])
 	int i;
 
 	for (i = 0; i < argc; i++) {
-		if (cfg->verbose) syslog(LOG_DEBUG, "arg: \"%s\"", argv[i]);
-		if (strchr(argv[i],':') && strchr(argv[i],'='))
-			pcsc_option(argv[i]);
-		else if (!strcmp(argv[i], "verbose")) cfg->verbose = 1;
+		if (strchr(argv[i],':') && strchr(argv[i],'=')) {
+			if (pcsc_option(argv[i]))
+				syslog(LOG_ERR,
+				"unrecognized pcsc backedn option \"%s\"",
+						argv[i]);
+		} else if (!strcmp(argv[i], "verbose")) cfg->verbose = 1;
 		else if (!strcmp(argv[i], "noaskpass")) cfg->noaskpass = 1;
 		else if (!strcmp(argv[i], "injectauth")) cfg->injectauth = 1;
 		else if (!strncmp(argv[i], "path=", 5))
 					authfile_template(argv[i]+5);
+		else syslog(LOG_ERR, "unrecognized arg: \"%s\"", argv[i]);
+
+		if (cfg->verbose) syslog(LOG_DEBUG, "arg: \"%s\"", argv[i]);
 	}
 }
 
@@ -169,6 +174,8 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags,
 		tokenid = user;
 		user = NULL;
 	}
+	if (cfg.verbose) syslog(LOG_DEBUG, "tokenid=\"%s\", user=\"%s\"",
+				tokenid?tokenid:"<none>", user?user:"<none>");
 
 	if (!cfg.noaskpass) {
 		if ((pam_err = pam_get_authtok(pamh, PAM_AUTHTOK,
@@ -193,6 +200,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags,
 			pam_set_item(pamh, PAM_USER, ao.data);
 		if (cfg.injectauth && ao.payload && ao.payload[0])
 			pam_set_item(pamh, PAM_AUTHTOK, ao.payload);
+		if (cfg.verbose) syslog(LOG_DEBUG, "authenticated");
 		return PAM_SUCCESS;
 	}
 }
