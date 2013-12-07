@@ -224,7 +224,7 @@ struct _auth_obj authfile(const char *tokenid,
 		}
 		fprintf(fp, "\n");
 		if (st.st_uid || st.st_gid) {
-			(void)fchown(fileno(fp), st.st_uid, st.st_gid);
+			if (fchown(fileno(fp), st.st_uid, st.st_gid)) /*ign*/;
 		}
 		if (fclose(fp) < 0) {
 			ret.err = strerror(errno);
