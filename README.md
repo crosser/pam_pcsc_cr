@@ -73,6 +73,9 @@ period. The downside is that if the token is used against multiple
 hosts, and one of them leaks the secret to an adversary, all hosts are
 compromised. This is not the case with the first approach.
 
+The particular data structure is outlined in the picture:
+![](auth-data-structure.svg)
+
 ## Module Operation
 
 Authentication file, containing nonce, encrypted shared secret,
