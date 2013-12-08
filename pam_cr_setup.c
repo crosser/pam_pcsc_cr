@@ -201,6 +201,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "%s\n", ao.err);
 		exit(EXIT_FAILURE);
 	} else if (verbose) {
+		printf("version: %s\n", VERSION);
 		printf("userid : \"%.*s\"\n", ao.datasize, ao.data);
 		printf("payload: \"%.*s\"\n", ao.paylsize, ao.payload);
 	}

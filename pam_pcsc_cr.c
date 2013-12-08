@@ -164,6 +164,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags,
 
 	parse_cfg(&cfg, argc, argv);
 	(void)pam_set_data(pamh, "pcsc_cr_cfg_struct", &cfg, NULL);
+	if (cfg.verbose) syslog(LOG_INFO, "auth with %s", PACKAGE_STRING);
 
 	if ((pam_err = pam_get_user(pamh, &user, NULL)) != PAM_SUCCESS) {
 		if (cfg.verbose) syslog(LOG_ERR, "get_user failed: %s",
