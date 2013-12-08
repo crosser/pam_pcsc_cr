@@ -10,8 +10,8 @@ For details, see http://sourceforge.net/projects/libb64
 #ifndef BASE64_H
 #define BASE64_H
 
-int b64_encode(const char *src, const int ssize,
+int b64_encode(const unsigned char *src, const int ssize,
 		char *const b64, int *const bsize);
-int b64_decode(const char *b64, char *const dst, int *const dsize);
+int b64_decode(const char *b64, unsigned char *const dst, int *const dsize);
 
 #endif /* BASE64_H */

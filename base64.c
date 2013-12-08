@@ -66,10 +66,10 @@ static char base64_encode_value(char value_in)
 	return encoding[(int)value_in];
 }
 
-static int base64_encode_block(const char* plaintext_in, int length_in, char* code_out, base64_encodestate* state_in)
+static int base64_encode_block(const unsigned char* plaintext_in, int length_in, char* code_out, base64_encodestate* state_in)
 {
-	const char* plainchar = plaintext_in;
-	const char* const plaintextend = plaintext_in + length_in;
+	const unsigned char* plainchar = plaintext_in;
+	const unsigned char* const plaintextend = plaintext_in + length_in;
 	char* codechar = code_out;
 	char result;
 	char fragment;
@@ -167,10 +167,10 @@ static void base64_init_decodestate(base64_decodestate* state_in)
 	state_in->plainchar = 0;
 }
 
-static int base64_decode_block(const char* code_in, const int length_in, char* plaintext_out, base64_decodestate* state_in)
+static int base64_decode_block(const char* code_in, const int length_in, unsigned char* plaintext_out, base64_decodestate* state_in)
 {
 	const char* codechar = code_in;
-	char* plainchar = plaintext_out;
+	unsigned char* plainchar = plaintext_out;
 	char fragment;
 	
 	*plainchar = state_in->plainchar;
@@ -231,14 +231,14 @@ static int base64_decode_block(const char* code_in, const int length_in, char* p
 	return plainchar - plaintext_out;
 }
 
-int b64_encode(const char *src, const int ssize,
+int b64_encode(const unsigned char *src, const int ssize,
 		char *const b64, int *const bsize)
 {
 	base64_encodestate s;
 	int cnt1, cnt2;
 	char *c = b64;
 
-	if (bsize < ((ssize-1)/3+1)*4+1) return 1;
+	if (*bsize < ((ssize-1)/3+1)*4+1) return 1;
 	base64_init_encodestate(&s);
 	cnt1 = base64_encode_block(src, ssize, c, &s);
 	c += cnt1;
@@ -249,13 +249,13 @@ int b64_encode(const char *src, const int ssize,
 	return 0;
 }
 
-int b64_decode(const char *b64, char *const dst, int *const dsize)
+int b64_decode(const char *b64, unsigned char *const dst, int *const dsize)
 {
 	base64_decodestate s;
 	int cnt;
 	int bsize = strlen(b64);
 
-	if (dsize < (bsize*3/4)) return 1;
+	if (*dsize < (bsize*3/4)) return 1;
 	base64_init_decodestate(&s);
 	cnt = base64_decode_block(b64, bsize, dst, &s);
 	*dsize = cnt;

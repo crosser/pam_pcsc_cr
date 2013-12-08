@@ -30,12 +30,12 @@ freely, subject to the following restrictions:
 #include <string.h>
 #include "base64.h"
 
-static char src[40] = "Quick brown fox jumps over the lazy dog";
+static unsigned char src[40] = "Quick brown fox jumps over the lazy dog";
 
 int main(int argc, char *argv[])
 {
 	char b64[80];
-	char dst[40];
+	unsigned char dst[44];
 	int bsize, dsize;
 
 	printf("src=\"%s\" (%d)\n", src, (int)sizeof(src));
