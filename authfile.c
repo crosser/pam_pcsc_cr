@@ -34,6 +34,7 @@ freely, subject to the following restrictions:
 #include <unistd.h>
 #include <errno.h>
 #include <alloca.h>
+#include "base64.h"
 #include "authobj.h"
 #include "authfile.h"
 
@@ -174,20 +175,10 @@ struct _auth_obj authfile(const char *tokenid,
 	if (ret.err) return ret;
 
 	if (w.hablob) {
-		int hlen = strlen(w.hablob);
-		if (hlen % 32 != 0) {
-			ret.err = "error: auth string has wrong length";
-		} else if (hlen !=
-				strspn(w.hablob, "0123456789abcdefABCDEF")) {
-			ret.err = "error: auth string not hexadecimal";
-		} else {
-			int i;
-
-			blobsize = hlen/2;
-			ablob = alloca(blobsize);
-			for (i = 0; i < blobsize; i++)
-				sscanf(&w.hablob[i*2], "%2hhx", &ablob[i]);
-		}
+		blobsize = strlen(w.hablob)*3/4;
+		ablob = alloca(blobsize);
+		if (b64_decode(w.hablob, ablob, &blobsize))
+			ret.err = "error: undecodeable auth string";
 	}
 	if (ret.err) return ret;
 
@@ -213,16 +204,16 @@ struct _auth_obj authfile(const char *tokenid,
 
 	oldmask = umask(077);
 	if ((fp = fopen(nfn, "w"))) {
-		int i;
+		int bsize = ((ao.datasize-1)/3+1)*4+1;
+		char *b64 = alloca(bsize);
 
-		if (fprintf(fp, "%s:%s:%s:", tokenid?tokenid:w.tokenid,
-				userid?userid:w.userid, newnonce) < 0) {
-			ret.err = strerror(errno);
-		} else for (i = 0; i < ao.datasize; i++)
-		    if (fprintf(fp, "%02x", ao.data[i]) < 0) {
+		if (b64_encode(ao.data, ao.datasize, b64, &bsize)) {
+			ret.err = "error: could not encode auth string";
+		} else if (fprintf(fp, "%s:%s:%s:%s\n",
+				tokenid?tokenid:w.tokenid,
+				userid?userid:w.userid, newnonce, b64) < 0) {
 			ret.err = strerror(errno);
 		}
-		fprintf(fp, "\n");
 		if (st.st_uid || st.st_gid) {
 			if (fchown(fileno(fp), st.st_uid, st.st_gid)) /*ign*/;
 		}
