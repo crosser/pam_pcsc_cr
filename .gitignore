@@ -3,6 +3,8 @@
 *.a
 *.la
 *.log
+*.trs
+*.tar.xz
 .deps/
 .libs/
 Makefile
@@ -26,12 +28,8 @@ missing
 stamp-h1
 test-driver
 test_chalresp
-test_chalresp.o
-test_chalresp.trs
 test_crypto
-test_crypto.trs
 test_serial
-test_serial.trs
 test_auth
-test_auth.trs
+test_base64
 pam_cr_setup
