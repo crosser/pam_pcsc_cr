@@ -31,7 +31,7 @@ test_crypto_LDADD = libpcsc_cr.la
 test_chalresp_LDADD = libpcsc_cr.la
 test_base64_LDADD = libpcsc_cr.la
 
-EXTRA_DIST = autogen.sh README.md README_CR
+EXTRA_DIST = autogen.sh README.md auth-data-structure.svg
 
 TESTS = test_auth test_serial test_crypto test_chalresp test_base64
 XFAIL_TESTS = test_chalresp
