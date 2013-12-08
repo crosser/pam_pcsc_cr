@@ -238,7 +238,7 @@ int b64_encode(const char *src, const int ssize,
 	int cnt1, cnt2;
 	char *c = b64;
 
-	/* FIXME check size */
+	if (bsize < ((ssize-1)/3+1)*4+1) return 1;
 	base64_init_encodestate(&s);
 	cnt1 = base64_encode_block(src, ssize, c, &s);
 	c += cnt1;
@@ -253,10 +253,11 @@ int b64_decode(const char *b64, char *const dst, int *const dsize)
 {
 	base64_decodestate s;
 	int cnt;
+	int bsize = strlen(b64);
 
-	/* FIXME check size */
+	if (dsize < (bsize*3/4)) return 1;
 	base64_init_decodestate(&s);
-	cnt = base64_decode_block(b64, strlen(b64), dst, &s);
+	cnt = base64_decode_block(b64, bsize, dst, &s);
 	*dsize = cnt;
 	return 0;
 }
