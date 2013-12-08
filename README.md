@@ -115,7 +115,7 @@ The only backend option existing is "ykneo:slot=1" or "ykneo:slot=2".
 Slot 2 is the default. Secret must be supplied when creating the file,
 and when modifying the file in the absense of the token. Password is
 used to construct the challenge. If not supplied empty string is used.
-The pam module also used empty string when given "noaskpass" argument,
+The pam module also uses empty string when given "noaskpass" argument,
 so this can be used for "one factor" authentication mode with token
 only. Payload is a string that can be optionally injected as the PAM
 authentication token after successful authentication; subsequent PAM
