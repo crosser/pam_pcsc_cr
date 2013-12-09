@@ -37,7 +37,7 @@ TESTS = test_auth test_serial test_crypto test_chalresp test_base64
 XFAIL_TESTS = test_chalresp
 
 html: README.html
-README.html: README.md
+README.html: README.md auth-data-structure.svg
 	pandoc -f markdown -t html5 --self-contained -o README.html README.md
 clean-local:
 	rm -f README.html
