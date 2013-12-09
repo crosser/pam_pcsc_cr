@@ -14,7 +14,7 @@
    id="svg2985"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="New document 2">
+   sodipodi:docname="auth-data-structure.svg">
   <defs
      id="defs2987" />
   <sodipodi:namedview
@@ -60,7 +60,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -152,46 +152,20 @@
          id="tspan3815"
          x="750"
          y="60">)</tspan></text>
-    <g
-       id="g3898"
-       transform="translate(1,-101)">
-      <rect
-         y="220.16344"
-         x="20.163443"
-         height="59.836563"
-         width="599.83655"
-         id="rect3831"
-         style="fill:none;stroke:#000000;stroke-width:4.32688332;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text3833"
-         y="261"
-         x="39"
-         style="font-size:28px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
-           y="261"
-           x="39"
-           id="tspan3835"
-           sodipodi:role="line">Secret+Payload+SHA1(Secret+Payload)</tspan></text>
-    </g>
     <rect
-       style="fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:#00ff00;stroke:#000000;stroke-width:4.32688332000000031;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect3831"
+       width="599.83655"
+       height="59.836563"
+       x="21.163443"
+       y="119.16344" />
+    <rect
+       style="fill:#ffff00;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="rect3843"
        width="400"
        height="60"
        x="380"
        y="219" />
-    <text
-       xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-       x="400"
-       y="260"
-       id="text3845"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan3847"
-         x="400"
-         y="260">HMAC-SHA1(</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
@@ -203,6 +177,150 @@
          id="tspan3851"
          x="750"
          y="259">)</tspan></text>
+    <rect
+       ry="0"
+       y="29"
+       x="559"
+       height="40"
+       width="90"
+       id="rect3888"
+       style="fill:#00ff00;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+    <rect
+       y="30"
+       x="671"
+       height="40"
+       width="70"
+       id="rect3896"
+       style="fill:#ffff00;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+    <rect
+       style="fill:#00ffff;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect3932"
+       width="480"
+       height="60"
+       x="20"
+       y="320" />
+    <rect
+       style="fill:#ff00ff;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect3967"
+       width="280"
+       height="60"
+       x="500"
+       y="420" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 542.14126,52.165466 2.141261,102.16547"
+       id="path3030"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       transform="translate(17.858739,17.834537)" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 632.14126,52.165466 -30,50.000004"
+       id="path3032"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       transform="translate(17.858739,17.834537)" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 652.14126,52.165466 -290,150.000004"
+       id="path3034"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       transform="translate(17.858739,17.834537)" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 722.14126,52.165466 40,150.000004"
+       id="path3036"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       transform="translate(17.858739,17.834537)" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 542.14126,252.16547 -539.999999,50"
+       id="path3038"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       transform="translate(17.858739,17.834537)" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 632.14126,252.16547 -150,50"
+       id="path3040"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       transform="translate(17.858739,17.834537)" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 652.14126,252.16547 -170,150"
+       id="path3042"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       transform="translate(17.858739,17.834537)" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 722.14126,252.16547 40,150"
+       id="path3044"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       transform="translate(17.858739,17.834537)" />
+    <text
+       sodipodi:linespacing="125%"
+       id="text3892"
+       y="60"
+       x="680"
+       style="font-size:28px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       xml:space="preserve"><tspan
+         y="60"
+         x="680"
+         id="tspan3894"
+         sodipodi:role="line">Key</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text3884"
+       y="60"
+       x="570"
+       style="font-size:28px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       xml:space="preserve"><tspan
+         y="60"
+         x="570"
+         id="tspan3886"
+         sodipodi:role="line">Data</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:28px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       x="40"
+       y="160"
+       id="text3833"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3835"
+         x="40"
+         y="160">Secret+Payload+SHA1(Secret+Payload)</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       x="400"
+       y="260"
+       id="text3845"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3847"
+         x="400"
+         y="260">HMAC-SHA1(</tspan></text>
+    <rect
+       style="fill:#00ffff;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect3865"
+       width="90"
+       height="40"
+       x="559"
+       y="228"
+       ry="0" />
+    <rect
+       style="fill:#ff00ff;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect3867"
+       width="70"
+       height="40"
+       x="671"
+       y="229" />
     <text
        xml:space="preserve"
        style="font-size:28px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
@@ -214,14 +332,6 @@
          id="tspan3859"
          x="570"
          y="259">Data</tspan></text>
-    <rect
-       style="fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       id="rect3865"
-       width="90"
-       height="40"
-       x="559"
-       y="228"
-       ry="0" />
     <text
        xml:space="preserve"
        style="font-size:28px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
@@ -233,81 +343,6 @@
          id="tspan3863"
          x="680"
          y="259">Key</tspan></text>
-    <rect
-       style="fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       id="rect3867"
-       width="70"
-       height="40"
-       x="671"
-       y="229" />
-    <g
-       id="g3882"
-       transform="translate(459,-431)">
-      <text
-         xml:space="preserve"
-         style="font-size:28px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-         x="111"
-         y="491"
-         id="text3884"
-         sodipodi:linespacing="125%"><tspan
-           sodipodi:role="line"
-           id="tspan3886"
-           x="111"
-           y="491">Data</tspan></text>
-      <rect
-         style="fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-         id="rect3888"
-         width="90"
-         height="40"
-         x="100"
-         y="460"
-         ry="0" />
-    </g>
-    <g
-       id="g3890"
-       transform="translate(391,-430)">
-      <text
-         xml:space="preserve"
-         style="font-size:28px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-         x="289"
-         y="490"
-         id="text3892"
-         sodipodi:linespacing="125%"><tspan
-           sodipodi:role="line"
-           id="tspan3894"
-           x="289"
-           y="490">Key</tspan></text>
-      <rect
-         style="fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-         id="rect3896"
-         width="70"
-         height="40"
-         x="280"
-         y="460" />
-    </g>
-    <path
-       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 559,64.918651 405.65689,119.16344"
-       id="path3928"
-       inkscape:connector-type="polyline"
-       inkscape:connector-curvature="0"
-       inkscape:connection-start="#g3882"
-       inkscape:connection-start-point="d4"
-       inkscape:connection-end="#g3898"
-       inkscape:connection-end-point="d4" />
-    <path
-       style="fill:none;stroke:#000000;stroke-width:0.73461336px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 693.46938,69.867306 620.36731,219.63269"
-       id="path3930"
-       inkscape:connector-type="polyline"
-       inkscape:connector-curvature="0" />
-    <rect
-       style="fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       id="rect3932"
-       width="480"
-       height="60"
-       x="20"
-       y="320" />
     <text
        xml:space="preserve"
        style="font-size:28px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
@@ -319,23 +354,6 @@
          id="tspan3936"
          x="39"
          y="359">SHA1(userid+password+nonce)</tspan></text>
-    <path
-       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 559,261.34302 361.17647,320"
-       id="path3961"
-       inkscape:connector-type="polyline"
-       inkscape:connector-curvature="0"
-       inkscape:connection-start="#rect3865"
-       inkscape:connection-start-point="d4"
-       inkscape:connection-end="#rect3932"
-       inkscape:connection-end-point="d4" />
-    <rect
-       style="fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       id="rect3967"
-       width="280"
-       height="60"
-       x="500"
-       y="420" />
     <text
        xml:space="preserve"
        style="font-size:28px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
@@ -347,15 +365,5 @@
          id="tspan3971"
          x="519"
          y="459">Secret</tspan></text>
-    <path
-       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 699.43284,269 649.85075,420"
-       id="path3973"
-       inkscape:connector-type="polyline"
-       inkscape:connector-curvature="0"
-       inkscape:connection-start="#rect3867"
-       inkscape:connection-start-point="d4"
-       inkscape:connection-end="#rect3967"
-       inkscape:connection-end-point="d4" />
   </g>
 </svg>
