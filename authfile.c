@@ -58,49 +58,42 @@ void authfile_template(const char *str)
 	template = str;
 }
 
-static int path_size(const char *tokenid, const char *userid)
+/*
+  I know using these two functions and alloca() in between it ugly, but
+  I like the alternatives even less. =ec
+*/
+
+static int path_size(const char *tokenid, const struct passwd *pw)
 {
 	const char *usub;
 	const char *p, *q;
-	struct passwd *pw;
 
 	if ((p = strchr(template, '~')) != strrchr(template, '~')) return 0;
 	if ((q = strchr(template, '?')) != strrchr(template, '?')) return 0;
-	if (p && !userid) return 0;
+	if (p && !pw) return 0;
 	if (q && !tokenid) return 0;
-	if (p == template) {
-		pw = getpwnam(userid);
-		if (!pw) return 0;
-		usub = pw->pw_dir;
-	} else {
-		usub = userid;
-	}
+	if (p == template) usub = pw->pw_dir;
+	else usub = pw->pw_name;
 	return strlen(template)+(p?strlen(usub):0)+(q?strlen(tokenid):0)+1;
 }
 
-static void
-make_path(char * const path, const char *tokenid, const char *userid)
+static int
+make_path(char * const path, const char *tokenid, const struct passwd *pw)
 {
-	const char *usub;
 	const char *p;
 	char *q;
-	struct passwd *pw;
 
 	path[0] = '\0';
-	if (template[0] == '~') {
-		pw = getpwnam(userid);
-		if (!pw) return;
-		usub = pw->pw_dir;
-	} else {
-		usub = userid;
-	}
 	q = path;
 	for (p = template; *p; p++) switch (*p) {
 	case '~':
-		strcpy(q, usub);
+		if (!pw) return 1;
+		if (p == template) strcpy(q, pw->pw_dir);
+		else strcpy(q, pw->pw_name);
 		while (*q) q++;
 		break;
 	case '?':
+		if (!tokenid) return 1;
 		strcpy(q, tokenid);
 		while (*q) q++;
 		break;
@@ -109,6 +102,7 @@ make_path(char * const path, const char *tokenid, const char *userid)
 		break;
 	}
 	*q = '\0';
+	return 0;
 }
 
 int parse(char * const buf, const int argc, const char *argv[const])
@@ -133,6 +127,7 @@ struct _auth_obj authfile(const char *tokenid,
 						const int csize))
 {
 	struct _auth_obj ret = {0};
+	const struct passwd *pw = NULL;
 	mode_t oldmask;
 	FILE *fp = NULL;
 	char *fn, *nfn;
@@ -151,12 +146,16 @@ struct _auth_obj authfile(const char *tokenid,
 	int nonsize;
 	struct _auth_obj ao;
 
-	if ((fnl = path_size(tokenid, userid)) == 0) {
-		ret.err = "authfile path impossible to build";
+	if (userid) pw = getpwnam(userid);
+	if ((fnl = path_size(tokenid, pw)) == 0) {
+		ret.err = "authfile path_size failed";
 		return ret;
 	}
 	fn = alloca(fnl);
-	make_path(fn, tokenid, userid);
+	if (make_path(fn, tokenid, pw)) {
+		ret.err = "authfile make_path failed";
+		return ret;
+	}
 	nfn = alloca(fnl+32);
 	snprintf(nfn, fnl+32, "%s.%d.%ld", fn, (int)getpid(), (long)time(NULL));
 	fp = fopen(fn, "r");
