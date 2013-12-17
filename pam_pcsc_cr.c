@@ -156,7 +156,6 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags,
 	int argc, const char *argv[])
 {
 	struct _cfg cfg = {0};
-	const char *tokenid = NULL;
 	const char *user;
 	const char *password;
 	struct _auth_obj ao;
@@ -171,12 +170,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags,
 					pam_strerror(pamh, pam_err));
 		return pam_err;
 	}
-	if (strspn(user, "0123456789") == strlen(user)) {
-		tokenid = user;
-		user = NULL;
-	}
-	if (cfg.verbose) syslog(LOG_DEBUG, "tokenid=\"%s\", user=\"%s\"",
-				tokenid?tokenid:"<none>", user?user:"<none>");
+	if (cfg.verbose) syslog(LOG_DEBUG, "user=\"%s\"", user?user:"<none>");
 
 	if (!cfg.noaskpass) {
 		if ((pam_err = pam_get_authtok(pamh, PAM_AUTHTOK,
@@ -191,14 +185,15 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags,
 		password = "";
 	}
 
-	ao = authfile(tokenid, user, password, update_nonce,
+	ao = authfile(user, password, update_nonce,
 			NULL, 0, NULL, 0, token_key);
 	if (ao.err) {
 		if (cfg.verbose) syslog(LOG_INFO, "authfile: %s", ao.err);
 		return PAM_AUTH_ERR;
 	} else {
-		if (!user)
-			pam_set_item(pamh, PAM_USER, ao.data);
+		/* Just because we can. Probably not much use for that.      */
+		/* Userid written in authfile may differ from the login one. */
+		pam_set_item(pamh, PAM_USER, ao.data);
 		if (cfg.injectauth && ao.payload && ao.payload[0])
 			pam_set_item(pamh, PAM_AUTHTOK, ao.payload);
 		if (cfg.verbose) syslog(LOG_DEBUG, "authenticated");

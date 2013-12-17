@@ -70,7 +70,6 @@ static void usage(const char * const cmd)
 		"    -f template       - template for auth state filepath\n"
 		"    -a secret | -A file-with-secret | -A -\n"
 		"                      - 40-character hexadecimal secret\n"
-		"    -s token-serial   - public I.D. of the token\n"
 		"    -n nonce          - initial nonce\n"
 		"    -l payload        - keyring unlock password\n"
 		"    -p password       - login password\n"
@@ -89,12 +88,11 @@ int main(int argc, char *argv[])
 	unsigned char bsecret[20];
 	unsigned char *secret = NULL;
 	int i;
-	char *tokenid = NULL;
 	char *userid = getlogin();
 	char *payload = NULL;
 	char *password = "";
 
-	while ((c = getopt(argc, argv, "ho:f:a:A:s:n:l:p:v")) != -1)
+	while ((c = getopt(argc, argv, "ho:f:a:A:n:l:p:v")) != -1)
 	    switch (c) {
 	case 'h':
 		usage(argv[0]);
@@ -123,9 +121,6 @@ int main(int argc, char *argv[])
 			fprintf(stderr, "-A and -a are mutually exclusive");
 			exit(EXIT_FAILURE);
 		}
-		break;
-	case 's':
-		tokenid = optarg;
 		break;
 	case 'n':
 		mynonce = optarg;
@@ -192,7 +187,7 @@ int main(int argc, char *argv[])
 			sscanf(hsecret + i * 2, "%2hhx", &bsecret[i]);
 		secret = bsecret;
 	}
-	ao = authfile(tokenid, userid, password, update_nonce,
+	ao = authfile(userid, password, update_nonce,
 			secret, secret ? sizeof(bsecret) : 0,
 			(unsigned char *)payload, payload ? strlen(payload) : 0,
 			token_key);

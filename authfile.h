@@ -26,8 +26,7 @@ freely, subject to the following restrictions:
 
 void authfile_template(const char *template);
 
-struct _auth_obj authfile(const char *tokenid,
-		const char *userid, const char *password,
+struct _auth_obj authfile(const char *userid, const char *password,
 		void (*update_nonce)(char *nonce, const int nonsize),
 		const unsigned char *secret, const int secsize,
 		const unsigned char *payload, const int paysize,

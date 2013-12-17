@@ -42,13 +42,11 @@ freely, subject to the following restrictions:
  * Template string may contain zero or one '~' and zero or one '?'.
  * '~' at the beginning of the template string is substituted with
  * the home directory of the userid. In any other position it is
- * substituted with the userid itself. '?' is substituted with the
- * tokenid. There is no way to make the resulting path contain '~'
- * or '?'. If there is more than one '~' or '?', or if the '~' is
- * at the beginning but userid does not resolve via getpwnam, or
- * the character to substitute is present but the argument is NULL,
- * NULL is returned. Otherwise, malloc()'ed area containg the path
- * string.
+ * substituted with the userid itself. There is no way to make the
+ * resulting path contain '~'. If there is more than one '~', or if
+ * the '~' is at the beginning but userid does not resolve via
+ * getpwnam, or '~' is present but the argument is NULL, path_size
+ * returns 0, and make_path returns 1.
  */
 
 static const char *template = "~/.pam_cr/auth";
@@ -63,22 +61,18 @@ void authfile_template(const char *str)
   I like the alternatives even less. =ec
 */
 
-static int path_size(const char *tokenid, const struct passwd *pw)
+static int path_size(const struct passwd *pw)
 {
-	const char *usub;
-	const char *p, *q;
+	const char *p;
 
 	if ((p = strchr(template, '~')) != strrchr(template, '~')) return 0;
-	if ((q = strchr(template, '?')) != strrchr(template, '?')) return 0;
 	if (p && !pw) return 0;
-	if (q && !tokenid) return 0;
-	if (p == template) usub = pw->pw_dir;
-	else usub = pw->pw_name;
-	return strlen(template)+(p?strlen(usub):0)+(q?strlen(tokenid):0)+1;
+	if (p == template) return strlen(template)+strlen(pw->pw_dir)+1;
+	else return strlen(template)+strlen(pw->pw_name)+1;
 }
 
 static int
-make_path(char * const path, const char *tokenid, const struct passwd *pw)
+make_path(char * const path, const struct passwd *pw)
 {
 	const char *p;
 	char *q;
@@ -90,11 +84,6 @@ make_path(char * const path, const char *tokenid, const struct passwd *pw)
 		if (!pw) return 1;
 		if (p == template) strcpy(q, pw->pw_dir);
 		else strcpy(q, pw->pw_name);
-		while (*q) q++;
-		break;
-	case '?':
-		if (!tokenid) return 1;
-		strcpy(q, tokenid);
 		while (*q) q++;
 		break;
 	default:
@@ -118,8 +107,7 @@ int parse(char * const buf, const int argc, const char *argv[const])
 	return i != argc;
 }
 
-struct _auth_obj authfile(const char *tokenid,
-		const char *userid, const char *password,
+struct _auth_obj authfile(const char *userid, const char *password,
 		void (*update_nonce)(char *nonce, const int nonsize),
 		const unsigned char *secret, const int secsize,
 		const unsigned char *payload, const int paylsize,
@@ -135,11 +123,10 @@ struct _auth_obj authfile(const char *tokenid,
 	struct stat st = {0};
 	char *buf = NULL;
 	struct {
-		const char *tokenid;
 		const char *userid;
 		const char *nonce;
 		const char *hablob;
-	} w = {"", NULL, NULL, NULL};
+	} w = {NULL, NULL, NULL};
 	unsigned char *ablob = NULL;
 	int blobsize = 0;
 	char *newnonce;
@@ -147,12 +134,12 @@ struct _auth_obj authfile(const char *tokenid,
 	struct _auth_obj ao;
 
 	if (userid) pw = getpwnam(userid);
-	if ((fnl = path_size(tokenid, pw)) == 0) {
+	if ((fnl = path_size(pw)) == 0) {
 		ret.err = "authfile path_size failed";
 		return ret;
 	}
 	fn = alloca(fnl);
-	if (make_path(fn, tokenid, pw)) {
+	if (make_path(fn, pw)) {
 		ret.err = "authfile make_path failed";
 		return ret;
 	}
@@ -208,8 +195,7 @@ struct _auth_obj authfile(const char *tokenid,
 
 		if (b64_encode(ao.data, ao.datasize, b64, &bsize)) {
 			ret.err = "error: could not encode auth string";
-		} else if (fprintf(fp, "%s:%s:%s:%s\n",
-				tokenid?tokenid:w.tokenid,
+		} else if (fprintf(fp, "%s:%s:%s\n",
 				userid?userid:w.userid, newnonce, b64) < 0) {
 			ret.err = strerror(errno);
 		}

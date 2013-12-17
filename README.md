@@ -84,12 +84,7 @@ according to template that can be provided both to PAM module and to the
 setup program (and must be the same, obviously). In the template string,
 character '~' in the first position is substituted with the userid's
 home directory, '~' in a position other than first - with the userid
-itself, and character '?' - with the "tokenid". This latter is just an
-arbitrary string that is not involved in the authentication process.
-But, if the template contains '?' but not '~', login process can start
-without the knowlege of the userid. Userid will be picked from the file
-and injected into the PAM environment, given that tokenid is known from
-the start.
+itself.
 
 Default template string is `~/.pam_cr/auth`, i.e. the file lives in the
 user's home directory, in the subdirectory `.pam_cr`.
