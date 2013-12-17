@@ -1,0 +1,103 @@
+.\"Copyright (c) 2013 Eugene Crosser
+.\"
+.\"This software is provided 'as-is', without any express or implied
+.\"warranty. In no event will the authors be held liable for any damages
+.\"arising from the use of this software.
+.\"
+.\"Permission is granted to anyone to use this software for any purpose,
+.\"including commercial applications, and to alter it and redistribute it
+.\"freely, subject to the following restrictions:
+.\"
+.\"    1. The origin of this software must not be misrepresented; you must
+.\"    not claim that you wrote the original software. If you use this
+.\"    software in a product, an acknowledgment in the product documentation
+.\"    would be appreciated but is not required.
+.\"
+.\"    2. Altered source versions must be plainly marked as such, and must
+.\"    not be misrepresented as being the original software.
+.\"
+.\"    3. This notice may not be removed or altered from any source
+.\"    distribution.
+.\"
+.TH PAM_CR_SETUP 8 "18 Dec 2013" PAM_PCSC_CR PAM_PCSC_CR
+.SH NAME
+pam_cr_setup \- manipulate user auth file for pam_pcsc_cr
+.SH SYNOPSYS
+.B pam_cr_setup
+[options] [username]
+.SH DESCRIPTION
+.B pam_cr_setup
+creates and modifies the file with the shared secret that is used by
+.B pam_pcsc_cr
+PAM module for crypto-token based authentication. To initially create
+the file, you must provide the shared secret that is also installed in
+the token. Later on, the command may be used to update the payload
+which may be the keyring unlock key. If used in the latter mode, and
+if the crypto-token is present, specifying the shared secret is not
+necessary.
+.SH OPTIONS
+.B \-h
+\- show short description and exit.
+.sp
+.B \-o backend-option
+\- option specific to the crypto-token.
+The format is
+.B backend:key=value.
+At present, only Yubikey Neo
+crypto-token is supported, and the only option is
+.B ykneo:slot=[1|2].
+.sp
+.B \-f template
+\- template for the auth file path. It may contain one character
+.B '~'
+which, if in the first position, is replaced with the userid's
+home directory path, and if in any other position - with the userid
+itself.
+.sp
+.B \-a secret
+or
+.B \-A file-with-secret
+or
+.B \-A -
+\- 40-character hexadecimal representation of the shared secret.
+It must be provided when first creating the file, and when updating
+the payload in the absense of the crypto-token.
+.B \-A -
+means that the 40-character string is read from
+.B stdin.
+.sp
+.B \-n nonce
+\- initial nonce. Currently this must be a decimal representation of an
+integer. It is subsequently incremented by one on every successful
+authentication session.
+.sp
+.B \-l payload
+\- a string that will be injected into the PAM framework as
+.B AUTH_TOKEN
+upon successful authentication. It is useful to have the keyring
+unlock password there. The payload is encrypted in the file, and only
+exists in memory in decrypted form for a short period (unless leaked
+by other PAM modules).
+.sp
+.B \-p password
+\- login password that is used to create the challenge (not the one
+from
+.BR /etc/shadow ").
+If not specified, an empty string is used, which is the same as the
+.B pam_pcsc_cr
+module uses when invoked with
+.B noaskpass
+argument. With empty password, login process requires only the presence
+of the crypto-token, and does not involve any input from the user.
+.sp
+.B \-v
+\- output the userid and payload from the auth file. Note that displaying
+the payload on screen to be seen by passers by may not be a good idea.
+.sp
+
+.SH COPYRIGHT
+2013 Eugene G. Crosser
+.br
+Released under zlib Open Source license.
+.SH SEE ALSO
+.BR pam "(3), "ykpersonalize "(1)
