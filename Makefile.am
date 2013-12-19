@@ -24,7 +24,7 @@ pam_pcsc_cr_la_LIBADD = libpcsc_cr.la
 bin_PROGRAMS = pam_cr_setup
 pam_cr_setup_LDADD = libpcsc_cr.la
 
-man_MANS = pam_cr_setup.8
+man_MANS = pam_cr_setup.8 pam_pcsc_cr.8
 
 check_PROGRAMS = test_auth test_serial test_crypto test_chalresp test_base64
 test_auth_LDADD = libpcsc_cr.la
@@ -33,7 +33,8 @@ test_crypto_LDADD = libpcsc_cr.la
 test_chalresp_LDADD = libpcsc_cr.la
 test_base64_LDADD = libpcsc_cr.la
 
-EXTRA_DIST = autogen.sh README.md auth-data-structure.svg
+EXTRA_DIST = autogen.sh README.md auth-data-structure.svg \
+	pam_cr_setup.8 pam_pcsc_cr.8
 
 TESTS = test_auth test_serial test_crypto test_chalresp test_base64
 XFAIL_TESTS = test_chalresp
