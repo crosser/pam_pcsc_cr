@@ -1,0 +1,67 @@
+.\"Copyright (c) 2013 Eugene Crosser
+.\"
+.\"This software is provided 'as-is', without any express or implied
+.\"warranty. In no event will the authors be held liable for any damages
+.\"arising from the use of this software.
+.\"
+.\"Permission is granted to anyone to use this software for any purpose,
+.\"including commercial applications, and to alter it and redistribute it
+.\"freely, subject to the following restrictions:
+.\"
+.\"    1. The origin of this software must not be misrepresented; you must
+.\"    not claim that you wrote the original software. If you use this
+.\"    software in a product, an acknowledgment in the product documentation
+.\"    would be appreciated but is not required.
+.\"
+.\"    2. Altered source versions must be plainly marked as such, and must
+.\"    not be misrepresented as being the original software.
+.\"
+.\"    3. This notice may not be removed or altered from any source
+.\"    distribution.
+.\"
+.TH PAM_PCSC_CR 8 "18 Dec 2013" PAM_PCSC_CR PAM_PCSC_CR
+.SH NAME
+pam_pcsc_cr \- Module for challenge-response authentication
+.SH SYNOPSYS
+.B pam_pcsc_cr.so [options]
+.SH DESCRIPTION
+This is a PAM module for crypto-token based authentication.
+It only provides authentication component, the rest are stubs.
+The module uses the contents of the auth file created with the
+.B pam_cr_setup
+command and optionally a password provided by the user to construct
+challenge that is sent to the crypto-token over
+.B pcsclite
+framework. The token's response is used to decipher the encrypted part
+of the file. If decryption is successful, then the extracted shared
+secret is used to produce ithe expected response to the future
+(different) challenge, encrypted again with the expected response,
+and stowed into the file. Additional payload that was decrypted on
+the way is optionally injected into the PAM framework as AUTH_TOKEN
+to be later used by keyring-unlocking module.
+.SH OPTIONS
+.B verbose
+\- write more error messages to syslog.
+.PP
+.B noaskpass
+\- do not try to ask the user for the challenge password, use empty
+string for the password.
+.PP
+.B injectauth
+\- inject payload as PAM_AUTHTOK for the benefit of subsequent PAM modules.
+.PP
+.B path=<string>
+\- template used to find the file.
+.PP
+.B backend:key=value
+\- option specific to the crypto-token. At present, only Yubikey Neo
+crypto-token is supported, and the only option is
+.B ykneo:slot=[1|2].
+.PP
+
+.SH COPYRIGHT
+2013 Eugene G. Crosser
+.br
+Released under zlib Open Source license.
+.SH SEE ALSO
+.BR pam "(3), "ykpersonalize "(1), "pam_cr_setup "(8)

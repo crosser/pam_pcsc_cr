@@ -5,6 +5,7 @@
 *.log
 *.trs
 *.tar.xz
+*.html
 .deps/
 .libs/
 Makefile
