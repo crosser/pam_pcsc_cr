@@ -137,7 +137,7 @@ PAM module has the following parameters:
 Check the [project homepage](http://www.average.org/chal-resp-auth/).
 
 Pick the source tarball
-[here](http://www.average.org/chal-resp-auth/pam_pcsc_cr-0.9.1.tar.xz),
+[here](http://www.average.org/chal-resp-auth/pam_pcsc_cr-0.9.2.tar.xz),
 or you can [clone](git://git.average.org/git/pam_pcsc_cr.git) or
 [browse](http://www.average.org/gitweb/?p=pam_pcsc_cr.git;a=summary)
 the git repo.
