@@ -13,7 +13,7 @@
    height="464.16547"
    id="svg2985"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
+   inkscape:version="0.48.3.1 r9886"
    sodipodi:docname="auth-data-structure.svg">
   <defs
      id="defs2987" />
@@ -72,17 +72,6 @@
     <text
        xml:space="preserve"
        style="font-size:28px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-       x="39.355469"
-       y="59.660156"
-       id="text3765"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan3767"
-         x="39.355469"
-         y="59.660156">tokenid</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-size:28px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
        x="177.62109"
        y="59.603516"
        id="text3769"
@@ -122,13 +111,6 @@
        width="370"
        height="60"
        x="410"
-       y="20" />
-    <rect
-       style="fill:none;stroke:#000000;stroke-width:4.28252268;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       id="rect3803"
-       width="140"
-       height="60"
-       x="20"
        y="20" />
     <text
        xml:space="preserve"
