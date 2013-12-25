@@ -58,7 +58,35 @@ string for the password.
 crypto-token is supported, and the only option is
 .B ykneo:slot=[1|2].
 .PP
-
+.SH "MODULE TYPES PROVIDED"
+.PP
+All module types (\fBaccount\fR,
+\fBauth\fR,
+\fBpassword\fR
+and
+\fBsession\fR) are provided, but only \fBauth\fR is not a stub\&.
+.SH "RETURN VALUES"
+.PP
+PAM_SUCCESS on successful authentication, error indication otherwise.
+.RE
+.SH "EXAMPLES"
+.PP
+An example usage for
+/etc/pam\&.d/login
+would be:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+# Authenticate the user
+auth       required   pam_pcsc_cr\&.so injectauth
+      
+.fi
+.if n \{\
+.RE
+.\}
+.sp
 .SH COPYRIGHT
 2013 Eugene G. Crosser
 .br
