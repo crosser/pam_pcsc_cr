@@ -126,6 +126,15 @@ make_authobj(const char *userid, const char *password, const char *nonce,
 	datasize = ((secsize + paylsize + HASHSIZE + 4 * sizeof(short) - 1) /
 			CBLKSIZE + 1) * CBLKSIZE;
 	data = alloca(datasize);
+	/* 
+	   We allocate memory rounded up to CBLKSIZE on the stack, but do not
+	   use the last bytes. Stack protectors, if enabled, fill this memory
+	   with `canary` value. Later, when encryption function is called,
+	   stack protector detects that it tries to access "uninitialized
+	   memory". Which, while technically true, is not an error. Still,
+	   let us make stack protector happy by initializing the whole area:
+	 */
+	memset(data, 0, datasize);
 	serial_init(&srl, data, datasize);
 	if (serial_put(&srl, secret, secsize) != secsize) {
 		ao.err = "authobj: serialization of secret failed";

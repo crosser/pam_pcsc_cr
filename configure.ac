@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([pam_pcsc_cr], 0.9.3)
+AC_INIT([pam_pcsc_cr], 0.9.4)
 AC_CONFIG_SRCDIR([pam_pcsc_cr.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
@@ -28,13 +28,14 @@ AC_CHECK_HEADERS([security/pam_modules.h security/pam_ext.h], [], [], [
 ])
 AC_CHECK_LIB([pam], [pam_start])
 AC_CHECK_FUNCS([pam_get_authtok])
+pamdir=/lib/${host_cpu}-${host_os}/security
 AC_ARG_WITH(pam-dir,
-	[  --with-pam-dir=DIR      path to install the PAM module (/lib/security)],
+	[  --with-pam-dir=DIR      path to install the PAM module (${pamdir})],
 	[PAMDIR="$withval"],
 	[
 case $prefix in
-*/_inst) PAMDIR='${exec_prefix}/lib/security' ;;
-*)       PAMDIR=/lib/security ;;
+*/_inst) PAMDIR="${prefix}${pamdir}" ;;
+*)       PAMDIR=${pamdir} ;;
 esac
 ])
 AC_SUBST(PAMDIR)

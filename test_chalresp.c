@@ -30,7 +30,7 @@ freely, subject to the following restrictions:
 #include <string.h>
 #include "pcsc_cr.h"
 
-static void usage(const char const *cmd)
+static void usage(const char *const cmd)
 {
 	fprintf(stderr,
 		"usage: %s [-o backend:name=value] ... \"challenge\"\n",

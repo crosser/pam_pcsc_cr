@@ -132,7 +132,7 @@ free_out:
 	return rc;
 }
 
-char *pcsc_errstr(long err) {
+const char *pcsc_errstr(long err) {
 	return pcsc_stringify_error(err);
 }
 
