@@ -241,6 +241,10 @@ struct _auth_obj authobj(const char *userid, const char *password,
 	struct _auth_obj new_ao = {0};
 
 	if (!secret || !secsize || !payload) {
+		if (!ablob || !blobsize) {
+			new_ao.err = "authobj: previous data not supplied";
+			return new_ao;
+		}
 		old_ao = parse_authobj(userid, password, oldnonce,
 					secret, secsize,
 					ablob, blobsize, fetch_key);
