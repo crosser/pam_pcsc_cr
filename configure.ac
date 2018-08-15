@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([pam_pcsc_cr], 0.9.4)
+AC_INIT([pam_pcsc_cr], 0.9.5)
 AC_CONFIG_SRCDIR([pam_pcsc_cr.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
@@ -45,7 +45,13 @@ PKG_CHECK_MODULES([PCSC], [libpcsclite])
 CPPFLAGS="$PCSC_CFLAGS $CPPFLAGS"
 LIBS="$PCSC_LIBS $LIBS"
 
-PKG_CHECK_MODULES([OPENSSL], [libcrypto], [], [:])
+AC_ARG_ENABLE(openssl,
+	[  --disable-openssl       do not use openssl even when it is present],
+	[], [enable_openssl=yes]
+)
+AS_IF([test "x$enable_openssl" = "xyes"], [
+  PKG_CHECK_MODULES([OPENSSL], [libcrypto], [], [:])
+])
 AS_IF([test "x$OPENSSL_CFLAGS" != "x" -o "x$OPENSSL_LIBS" != "x" ], [
   use_openssl=yes
 ])
