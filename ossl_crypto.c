@@ -75,7 +75,7 @@ static unsigned long ossl_hmac(const void *key, int const keylen,
 			const void *pt, const int tlen,
 			void *tag, int *taglen)
 {
-#if 1
+#if 0
 	HMAC_CTX hctx;
 
 	HMAC_CTX_init(&hctx);
