@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([pam_pcsc_cr], 0.9.5)
+AC_INIT([pam_pcsc_cr], 0.9.6)
 AC_CONFIG_SRCDIR([pam_pcsc_cr.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
@@ -11,6 +11,7 @@ AC_PROG_CC
 if test "X$CC" = "Xgcc"; then
   CFLAGS="$CFLAGS -Wall"
 fi
+dnl -fstack-protector-all -fsanitize=address
 
 AC_PROG_MAKE_SET
 AC_SUBST(PROGS)dnl
