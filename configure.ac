@@ -1,23 +1,23 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([pam_pcsc_cr], 0.9.6)
+AC_INIT([pam_pcsc_cr],[0.9.6])
 AC_CONFIG_SRCDIR([pam_pcsc_cr.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
-AM_CONFIG_HEADER([config.h])
-AC_LANG_C
+AC_CONFIG_HEADERS([config.h])
+AC_LANG([C])
 AC_PROG_CC
 
 if test "X$CC" = "Xgcc"; then
-  CFLAGS="$CFLAGS -Wall"
+  CFLAGS="$CFLAGS -Wall -fstack-protector-all -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3"
 fi
-dnl -fstack-protector-all -fsanitize=address
+dnl make CFLAGS="-fsanitize=address -fno-omit-frame-pointer -g" LDFLAGS="-static-libasan"
 
 AC_PROG_MAKE_SET
 AC_SUBST(PROGS)dnl
 AC_SUBST(LIBPROGS)dnl
 AC_PROG_INSTALL
-AM_PROG_LIBTOOL
+LT_INIT
 PKG_PROG_PKG_CONFIG
 
 AC_CHECK_HEADERS([security/pam_appl.h], [], [
@@ -104,8 +104,6 @@ AS_IF([test "x$use_gcrypt" = "xyes"], [
 AC_SUBST(CRYPTO_OBJS)
 
 dnl Checks for header files.
-AC_HEADER_STDC
-AC_HEADER_TIME
 
 AC_CHECK_HEADERS([winscard.h reader.h], [],
   [AC_MSG_ERROR([[pcsclite headers not found]])])
