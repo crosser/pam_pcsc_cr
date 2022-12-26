@@ -10,8 +10,10 @@ AC_PROG_CC
 
 if test "X$CC" = "Xgcc"; then
   CFLAGS="$CFLAGS -Wall -fstack-protector-all -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3"
-fi
 dnl make CFLAGS="-fsanitize=address -fno-omit-frame-pointer -g" LDFLAGS="-static-libasan"
+else if test "X$CC" = "Xclang"; then
+  CFLAGS="$CFLAGS -Wall -Wformat -Wformat-security -Werror=format-security -fstack-protector-all -fsanitize=safe-stack -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2"
+fi; fi
 
 AC_PROG_MAKE_SET
 AC_SUBST(PROGS)dnl
