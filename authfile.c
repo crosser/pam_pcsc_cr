@@ -190,7 +190,7 @@ struct _auth_obj authfile(const char *userid, const char *password,
 
 	oldmask = umask(077);
 	if ((fp = fopen(nfn, "w"))) {
-		int bsize = ((ao.datasize-1)/3+1)*4+2; /* why +2 ??? */
+		int bsize = ((ao.datasize-1)/3+1)*4+1;
 		char *b64 = alloca(bsize);
 
 		if (b64_encode(ao.data, ao.datasize, b64, &bsize)) {

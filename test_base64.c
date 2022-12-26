@@ -34,22 +34,23 @@ static unsigned char src[40] = "Quick brown fox jumps over the lazy dog";
 
 int main(int argc, char *argv[])
 {
-	char b64[80];
-	unsigned char dst[44];
+	int rc;
+	char b64[57];  /* Must be: ((ssize-1)/3+1)*4+1) = 57 */
+	char unsigned dst[42];  /* Must be: strlen(b64)*3/4 = 42 */
 	int bsize, dsize;
 
-	printf("src=\"%s\" (%d)\n", src, (int)sizeof(src));
+	printf("src=\"%s\" (%lu/%d)\n", src, strlen((char *)src), (int)sizeof(src));
 	bsize = sizeof(b64);
 	if (b64_encode(src, sizeof(src), b64, &bsize)) {
 		fprintf(stderr, "encode error\n");
 		return 1;
 	}
-	printf("b64=\"%s\" (%d)\n", b64, bsize);
+	printf("b64=\"%s\" (%lu/%d)\n", b64, strlen(b64), bsize);
 	dsize = sizeof(dst);
-	if (b64_decode(b64, dst, &dsize)) {
-		fprintf(stderr, "decode error\n");
+	if ((rc = b64_decode(b64, dst, &dsize))) {
+		fprintf(stderr, "decode error, rc=%d\n", rc);
 		return 1;
 	}
-	printf("dst=\"%s\" (%d)\n", dst, dsize);
+	printf("dst=\"%s\" (%lu/%d)\n", dst, strlen((char *)dst), dsize);
 	return !(dsize == sizeof(src) && !memcmp(src, dst, dsize));
 }
