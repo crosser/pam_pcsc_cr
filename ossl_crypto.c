@@ -37,8 +37,8 @@ static const char *ossl_init(void)
 	return "openssl";
 }
 
-static unsigned long ossl_encrypt(const void *key, const int keylen, void *iv,
-			const void *pt, void *ct, const int tlen)
+static unsigned long ossl_encrypt(const void *key, const size_t keylen, void *iv,
+			const void *pt, void *ct, const size_t tlen)
 {
 	AES_KEY akey;
 
@@ -48,8 +48,8 @@ static unsigned long ossl_encrypt(const void *key, const int keylen, void *iv,
 	return 0UL;
 }
 
-static unsigned long ossl_decrypt(const void *key, const int keylen, void *iv,
-			const void *ct, void *pt, const int tlen)
+static unsigned long ossl_decrypt(const void *key, const size_t keylen, void *iv,
+			const void *ct, void *pt, const size_t tlen)
 {
 	AES_KEY akey;
 
@@ -59,8 +59,8 @@ static unsigned long ossl_decrypt(const void *key, const int keylen, void *iv,
 	return 0UL;
 }
 
-static unsigned long ossl_hash(const void *pt, const int tlen,
-			void *tag, int *taglen)
+static unsigned long ossl_hash(const void *pt, const size_t tlen,
+			void *tag, size_t *taglen)
 {
 	SHA_CTX sctx;
 
@@ -71,9 +71,9 @@ static unsigned long ossl_hash(const void *pt, const int tlen,
 	return 0UL;
 }
 
-static unsigned long ossl_hmac(const void *key, int const keylen,
-			const void *pt, const int tlen,
-			void *tag, int *taglen)
+static unsigned long ossl_hmac(const void *key, size_t const keylen,
+			const void *pt, const size_t tlen,
+			void *tag, size_t *taglen)
 {
 #if 0
 	HMAC_CTX hctx;

@@ -24,6 +24,7 @@ freely, subject to the following restrictions:
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
+#include <stddef.h>
 #include <assert.h>
 #include "crypto.h"
 #include "crypto_if.h"
@@ -44,7 +45,7 @@ static struct crypto_interface *ifs[] = {
 #endif
 	(struct crypto_interface *)0,
 };
-#define MAX_IF (sizeof(ifs)/sizeof(struct crypto_interface *)-2)
+#define MAX_IF (int)(sizeof(ifs)/sizeof(struct crypto_interface *)-2)
 
 static int which = 0;
 
@@ -63,7 +64,7 @@ const char *crypto_init(const int ifno)
 
 #define INITIV {0}
 
-unsigned long encrypt(const void *key, const int keylen, const void *pt, void *ct, const int tlen)
+unsigned long encrypt(const void *key, const size_t keylen, const void *pt, void *ct, const size_t tlen)
 {
 	unsigned char iv[16] = INITIV;
 
@@ -71,7 +72,7 @@ unsigned long encrypt(const void *key, const int keylen, const void *pt, void *c
 	return ifs[which]->encrypt(key, keylen, iv, pt, ct, tlen);
 }
 
-unsigned long decrypt(const void *key, const int keylen, const void *ct, void *pt, const int tlen)
+unsigned long decrypt(const void *key, const size_t keylen, const void *ct, void *pt, const size_t tlen)
 {
 	unsigned char iv[16] = INITIV;
 
@@ -79,13 +80,13 @@ unsigned long decrypt(const void *key, const int keylen, const void *ct, void *p
 	return ifs[which]->decrypt(key, keylen, iv, ct, pt, tlen);
 }
 
-unsigned long hash(const void *pt, const int tlen, void *tag, int *taglen)
+unsigned long hash(const void *pt, const size_t tlen, void *tag, size_t *taglen)
 {
 	assert(*taglen == 20);
 	return ifs[which]->hash(pt, tlen, tag, taglen);
 }
 
-unsigned long hmac(const void *key, const int keylen, const void *pt, const int tlen, void *tag, int *taglen)
+unsigned long hmac(const void *key, const size_t keylen, const void *pt, const size_t tlen, void *tag, size_t *taglen)
 {
 	assert(*taglen == 20);
 	return ifs[which]->hmac(key, keylen, pt, tlen, tag, taglen);

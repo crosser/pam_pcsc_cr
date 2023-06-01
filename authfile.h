@@ -27,10 +27,10 @@ freely, subject to the following restrictions:
 void authfile_template(const char *template);
 
 struct _auth_obj authfile(const char *userid, const char *password,
-		void (*update_nonce)(char *nonce, const int nonsize),
-		const unsigned char *secret, const int secsize,
-		const unsigned char *payload, const int paysize,
+		void (*update_nonce)(char *nonce, const size_t nonsize),
+		const unsigned char *secret, const size_t secsize,
+		const unsigned char *payload, const size_t paysize,
 		struct _auth_chunk (*fetch_key)(const unsigned char *chal,
-						const int csize));
+						const size_t csize));
 
 #endif

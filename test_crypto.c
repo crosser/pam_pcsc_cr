@@ -33,7 +33,7 @@ freely, subject to the following restrictions:
 #define printh(x) printh_f(#x, x, sizeof(x))
 void printh_f(char *p, unsigned char *x, size_t l)
 {
-	int i;
+	size_t i;
 	printf("%s:", p);
 	for (i=0; i<l; i++) printf(" %02x", x[i]);
 	printf("\n");
@@ -76,7 +76,7 @@ int test_sha(int iface)
 {
 	unsigned char sha1[20];
 	unsigned long err;
-	int shalen;
+	size_t shalen;
 	unsigned char spt[3] = "abc";
 	unsigned char sstd[20] = {0xA9,0x99,0x3E,0x36,0x47,0x06,0x81,0x6A,
 		0xBA,0x3E,0x25,0x71,0x78,0x50,0xC2,0x6C,0x9C,0xD0,0xD8,0x9D};
@@ -88,7 +88,7 @@ int test_sha(int iface)
 		printf("hash error: %s\n", crypto_errstr(err));
 		return 1;
 	}
-	printf("%d: len=%d ", iface, shalen);
+	printf("%d: len=%d ", iface, (int)shalen);
 	printh(sha1);
 	if (memcmp(sha1, sstd, sizeof(sstd))) {
 		printf("fail\n");
@@ -101,7 +101,7 @@ int test_hmac(int iface)
 {
 	unsigned char hmac1[20];
 	unsigned long err;
-	int hmaclen;
+	size_t hmaclen;
 	unsigned char hpt[28] = "what do ya want for nothing?";
 	unsigned char hkey[4] = "Jefe";
 	unsigned char hstd[20] = {0xef,0xfc,0xdf,0x6a,0xe5,0xeb,0x2f,0xa2,
@@ -115,7 +115,7 @@ int test_hmac(int iface)
 		printf("hash error: %s\n", crypto_errstr(err));
 		return 1;
 	}
-	printf("%d: len=%d ", iface, hmaclen);
+	printf("%d: len=%d ", iface, (int)hmaclen);
 	printh(hmac1);
 	if (memcmp(hmac1, hstd, sizeof(hstd))) {
 		printf("fail\n");

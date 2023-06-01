@@ -110,11 +110,11 @@ static int pam_get_authtok(pam_handle_t *pamh, int item, const char **authtok,
 #endif
 
 static struct _auth_chunk
-token_key(const unsigned char *challenge, const int challengesize)
+token_key(const unsigned char *challenge, const size_t challengesize)
 {
 	struct _auth_chunk ho = {0};
 	long rc;
-	int keysize = sizeof(ho.data);
+	size_t keysize = sizeof(ho.data);
 
 	if ((rc = pcsc_cr(challenge, challengesize, ho.data, &keysize))) {
 		ho.err = pcsc_errstr(rc);
@@ -122,7 +122,7 @@ token_key(const unsigned char *challenge, const int challengesize)
 	return ho;
 }
 
-static void update_nonce(char *nonce, const int nonsize)
+static void update_nonce(char *nonce, const size_t nonsize)
 {
 	int n = 0;
 
@@ -186,7 +186,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags,
 	}
 
 	ao = authfile(user, password, update_nonce,
-			NULL, 0, NULL, 0, token_key);
+			NULL, (size_t)0, NULL, (size_t)0, token_key);
 	if (ao.err) {
 		if (cfg.verbose) syslog(LOG_INFO, "authfile: %s", ao.err);
 		return PAM_AUTH_ERR;

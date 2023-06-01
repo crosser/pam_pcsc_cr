@@ -108,11 +108,11 @@ int parse(char * const buf, const int argc, const char *argv[const])
 }
 
 struct _auth_obj authfile(const char *userid, const char *password,
-		void (*update_nonce)(char *nonce, const int nonsize),
-		const unsigned char *secret, const int secsize,
-		const unsigned char *payload, const int paylsize,
+		void (*update_nonce)(char *nonce, const size_t nonsize),
+		const unsigned char *secret, const size_t secsize,
+		const unsigned char *payload, const size_t paylsize,
 		struct _auth_chunk (*fetch_key)(const unsigned char *chal,
-						const int csize))
+						const size_t csize))
 {
 	struct _auth_obj ret = {0};
 	const struct passwd *pw = NULL;
@@ -200,7 +200,7 @@ struct _auth_obj authfile(const char *userid, const char *password,
 			ret.err = strerror(errno);
 		}
 		if (st.st_uid || st.st_gid) {
-			if (fchown(fileno(fp), st.st_uid, st.st_gid)) /*ign*/;
+			if (fchown(fileno(fp), st.st_uid, st.st_gid)) {/*ign*/;}
 		}
 		if (fclose(fp) < 0) {
 			ret.err = strerror(errno);

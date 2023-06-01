@@ -27,15 +27,15 @@ freely, subject to the following restrictions:
 #include <string.h>
 #include "serial.h"
 
-void serial_init(serializer_t *srl, void *buffer, int size)
+void serial_init(serializer_t *srl, void *buffer, size_t size)
 {
 	srl->buffer = srl->cursor = buffer;
 	srl->bufsize = size;
 }
 
-void serial_switch(serializer_t *srl, void *buffer, int size)
+void serial_switch(serializer_t *srl, void *buffer, size_t size)
 {
-	int used = srl->cursor - srl->buffer;
+	size_t used = srl->cursor - srl->buffer;
 
 	memcpy(buffer, srl->buffer, used);
 	srl->buffer = buffer;
@@ -44,9 +44,9 @@ void serial_switch(serializer_t *srl, void *buffer, int size)
 }
 
 /* returns 'size' on success, or remainging space if it was insufficient */
-int serial_put(serializer_t *srl, const void *item, int size)
+size_t serial_put(serializer_t *srl, const void *item, size_t size)
 {
-	int left = srl->bufsize - (srl->cursor - srl->buffer);
+	size_t left = srl->bufsize - (srl->cursor - srl->buffer);
 
 	if (left < size + sizeof(short)) return left - sizeof(short);
 	*((short *)srl->cursor) = size;
@@ -57,9 +57,9 @@ int serial_put(serializer_t *srl, const void *item, int size)
 }
 
 /* return 0 on success, -1 on wrong encoding (item longer than space left) */
-int serial_get(serializer_t *srl, void **item, int *size)
+int serial_get(serializer_t *srl, void **item, size_t *size)
 {
-	int left = srl->bufsize - (srl->cursor - srl->buffer);
+	size_t left = srl->bufsize - (srl->cursor - srl->buffer);
 	short isize = *((short *)srl->cursor);
 
 	if (isize + sizeof(short) > left) return -1;
@@ -70,7 +70,7 @@ int serial_get(serializer_t *srl, void **item, int *size)
 	return 0;
 }
 
-int serial_size(serializer_t *srl)
+size_t serial_size(serializer_t *srl)
 {
 	return srl->cursor - srl->buffer;
 }

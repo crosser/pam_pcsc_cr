@@ -34,11 +34,11 @@ unsigned char secret[] = {
 };
 
 static struct _auth_chunk
-conjure_key(const unsigned char *challenge, const int challengesize)
+conjure_key(const unsigned char *challenge, const size_t challengesize)
 {
 	struct _auth_chunk ho = {0};
 	long rc;
-	int keysize = sizeof(ho.data);
+	size_t keysize = sizeof(ho.data);
 
 	if ((rc = hmac(secret, sizeof(secret), challenge, challengesize,
 						&ho.data, &keysize))) {
@@ -50,11 +50,11 @@ conjure_key(const unsigned char *challenge, const int challengesize)
 }
 
 static struct _auth_chunk
-token_key(const unsigned char *challenge, const int challengesize)
+token_key(const unsigned char *challenge, const size_t challengesize)
 {
 	struct _auth_chunk ho = {0};
 	long rc;
-	int keysize = sizeof(ho.data);
+	size_t keysize = sizeof(ho.data);
 
 	if ((rc = pcsc_cr(challenge, challengesize, ho.data, &keysize))) {
 		ho.err = pcsc_errstr(rc);
@@ -69,11 +69,11 @@ int main(int argc, char *argv[])
 	const char *nonce = "1";
 	const unsigned char *payload = (unsigned char *)
 					"To authorize or not to authorize?";
-	int i;
+	size_t i;
 	struct _auth_obj ao;
 	struct _auth_obj nao;
 	struct _auth_chunk (*fetch_key)(const unsigned char *challenge,
-					const int challengesize);
+					const size_t challengesize);
 
 	if (argc == 2 && strlen(argv[1]) == 40 &&
 			strspn(argv[1], "0123456789abcdefABCDEF") == 40) {
@@ -88,9 +88,9 @@ int main(int argc, char *argv[])
 			payload, strlen((char *)payload),
 			NULL, 0, NULL);
 	printf("new_authobj err=%s\n", ao.err?ao.err:"<no error>");
-	printf("data(%d):", ao.datasize);
+	printf("data(%d):", (int)ao.datasize);
 	for (i = 0; i < ao.datasize; i++) printf(" %02x", ao.data[i]);
-	printf("\npayload(%d): \"%.*s\"\n", ao.paylsize, ao.paylsize,
+	printf("\npayload(%d): \"%.*s\"\n", (int)ao.paylsize, (int)ao.paylsize,
 		ao.payload?(char*)ao.payload:"");
 	if (ao.err) {
 		if (ao.buffer) free(ao.buffer);
@@ -100,9 +100,9 @@ int main(int argc, char *argv[])
 	nao = authobj(id, pass, nonce, nonce, NULL, 0, NULL, 0,
 			ao.data, ao.datasize, fetch_key);
 	printf("verify_authobj err=%s\n", nao.err?nao.err:"<no error>");
-	printf("data(%d):", nao.datasize);
+	printf("data(%d):", (int)nao.datasize);
 	for (i = 0; i < nao.datasize; i++) printf(" %02x", nao.data[i]);
-	printf("\npayload(%d): \"%.*s\"\n", nao.paylsize, nao.paylsize,
+	printf("\npayload(%d): \"%.*s\"\n", (int)nao.paylsize, (int)nao.paylsize,
 		nao.payload?(char*)nao.payload:"");
 	if (nao.err) {
 		if (nao.buffer) free(nao.buffer);

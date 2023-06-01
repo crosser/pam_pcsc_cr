@@ -26,14 +26,14 @@ freely, subject to the following restrictions:
 
 typedef struct _serializer {
 	char *buffer;
-	int bufsize;
+	size_t bufsize;
 	char *cursor;
 } serializer_t;
 
-void serial_init(serializer_t *srl, void *buffer, int size);
-void serial_switch(serializer_t *srl, void *buffer, int size);
-int serial_put(serializer_t *srl, const void *item, int size);
-int serial_get(serializer_t *srl, void **item, int *size);
-int serial_size(serializer_t *srl);
+void serial_init(serializer_t *srl, void *buffer, size_t size);
+void serial_switch(serializer_t *srl, void *buffer, size_t size);
+size_t serial_put(serializer_t *srl, const void *item, size_t size);
+int serial_get(serializer_t *srl, void **item, size_t *size);
+size_t serial_size(serializer_t *srl);
 
 #endif

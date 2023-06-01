@@ -38,10 +38,10 @@ make_challenge(const char *uid, const char *pass, const char *nonce)
 	struct _auth_chunk ho = {0};
 	unsigned long rc;
 	serializer_t srl;
-	int datasize = strlen(uid) + strlen(pass) + strlen(nonce) +
+	size_t datasize = strlen(uid) + strlen(pass) + strlen(nonce) +
 			4 * sizeof(short);
 	unsigned char *data = alloca(datasize);
-	int hashsize = sizeof(ho.data);
+	size_t hashsize = sizeof(ho.data);
 
 	serial_init(&srl, data, datasize);
 	if (serial_put(&srl, uid, strlen(uid)) != strlen(uid)) {
@@ -65,12 +65,12 @@ make_challenge(const char *uid, const char *pass, const char *nonce)
 }
 
 static struct _auth_chunk
-new_key(const unsigned char *challenge, const int challengesize,
-	const unsigned char *secret, const int secsize)
+new_key(const unsigned char *challenge, const size_t challengesize,
+	const unsigned char *secret, const size_t secsize)
 {
 	struct _auth_chunk ho = {0};
 	unsigned long rc;
-	int keysize = sizeof(ho.data);
+	size_t keysize = sizeof(ho.data);
 
 	if ((rc = hmac(secret, secsize, challenge, challengesize,
 			&ho.data, &keysize))) {
@@ -85,7 +85,7 @@ static struct _auth_chunk
 make_key(const char *userid, const char *password, const char *nonce,
 	const unsigned char *secret, const int secsize,
 	struct _auth_chunk (*fetch_key)(const unsigned char *chal,
-					const int csize))
+					const size_t csize))
 {
 	struct _auth_chunk ho_chal, ho_key = {0};
 
@@ -112,15 +112,15 @@ make_key(const char *userid, const char *password, const char *nonce,
 
 static struct _auth_obj
 make_authobj(const char *userid, const char *password, const char *nonce,
-		const unsigned char *secret, const int secsize,
-		const unsigned char *payload, const int paylsize)
+		const unsigned char *secret, const size_t secsize,
+		const unsigned char *payload, const size_t paylsize)
 {
 	struct _auth_obj ao = {0};
 	unsigned long rc;
 	unsigned char *data;
-	int datasize;
+	size_t datasize;
 	unsigned char datahash[HASHSIZE];
-	int datahashsize = HASHSIZE;
+	size_t datahashsize = HASHSIZE;
 	serializer_t srl;
 
 	datasize = ((secsize + paylsize + HASHSIZE + 4 * sizeof(short) - 1) /
@@ -182,7 +182,7 @@ parse_authobj(const char *userid, const char *password, const char *nonce,
 		const unsigned char *secret, const int secsize,
 		const unsigned char *ablob, const int blobsize,
 		struct _auth_chunk (*fetch_key)(const unsigned char *chal,
-						const int csize))
+						const size_t csize))
 {
 	unsigned long rc;
 	struct _auth_obj ao = {0};
@@ -199,9 +199,9 @@ parse_authobj(const char *userid, const char *password, const char *nonce,
 	} else {
 		serializer_t srl;
 		unsigned char myhash[HASHSIZE];
-		int myhsize = HASHSIZE;
+		size_t myhsize = HASHSIZE;
 		unsigned char *theirhash;
-		int theirhsize;
+		size_t theirhsize;
 		unsigned long rc;
 
 		serial_init(&srl, ao.buffer, blobsize);
@@ -227,11 +227,11 @@ parse_authobj(const char *userid, const char *password, const char *nonce,
 
 struct _auth_obj authobj(const char *userid, const char *password,
 		const char *oldnonce, const char *newnonce,
-		const unsigned char *secret, const int secsize,
-		const unsigned char *payload, const int paylsize,
-		const unsigned char *ablob, const int blobsize,
+		const unsigned char *secret, const size_t secsize,
+		const unsigned char *payload, const size_t paylsize,
+		const unsigned char *ablob, const size_t blobsize,
 		struct _auth_chunk (*fetch_key)(const unsigned char *chal,
-						const int csize))
+						const size_t csize))
 {
 	const unsigned char *wsecret;
 	int wsecsize;

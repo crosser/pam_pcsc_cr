@@ -40,10 +40,10 @@ static void usage(const char *const cmd)
 int main(int argc, char *argv[])
 {
 	unsigned char chal[64];
-	int csize;
+	size_t csize;
 	unsigned char rbuf[20];
-	int rsize = sizeof(rbuf);
-	int i;
+	size_t rsize = sizeof(rbuf);
+	size_t i;
 	long rc;
 	int c;
 
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 	csize = strlen(argv[optind]);
 	if (csize > sizeof(chal)) {
 		fprintf(stderr, "Challenge longer than %d, cannot do that\n",
-			csize);
+			(int)csize);
 		exit(1);
 	}
 #if 0
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 	
 	memset(rbuf, 0xFE, sizeof(rbuf));
 	rc = pcsc_cr(chal, csize, rbuf, &rsize);
-	printf("rc=%ld (%s) rsize=%d:", rc, pcsc_errstr(rc), rsize);
+	printf("rc=%ld (%s) rsize=%d:", rc, pcsc_errstr(rc), (int)rsize);
 	for (i = 0; i < rsize; i++) printf(" %02x", rbuf[i]);
 	printf("\n");
 	return rc;

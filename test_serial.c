@@ -50,19 +50,19 @@ int main(int argc, char *argv[])
 		printf("serial_put(..., NULL, 0) = %d\n", rc);
 		return 1;
 	}
-	printf("serialized size=%d\n", serial_size(&srl));
+	printf("serialized size=%d\n", (int)serial_size(&srl));
 	serial_init(&srl, buffer, sizeof(buffer));
 	for (i = 0; i < 4; i++) {
 		char *item;
-		int size;
+		size_t size;
 		if (serial_get(&srl, (void**)&item, &size)) {
 			printf("serial_get failed for item %d\n", i);
 			rc = 1;
 		} else {
-			printf("serial_get(...) = %d: \"%.*s\"\n", size, size, item);
+			printf("serial_get(...) = %d: \"%.*s\"\n", (int)size, (int)size, item);
 			if (memcmp(in[i], item, size)) {
 				printf("\"%s\" != \"%s\" (%d)\n",
-					in[i], item, size);
+					in[i], item, (int)size);
 				rc = 1;
 			}
 		}

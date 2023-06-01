@@ -9,10 +9,9 @@ AC_LANG([C])
 AC_PROG_CC
 
 if test "X$CC" = "Xgcc"; then
-  CFLAGS="$CFLAGS -Wall -fstack-protector-all -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3"
-dnl make CFLAGS="-fsanitize=address -fno-omit-frame-pointer -g" LDFLAGS="-static-libasan"
+    CFLAGS="$CFLAGS -Wextra -Wall -Werror -Wno-unused-parameter -Wno-deprecated-declarations -fstack-protector-all -fsanitize=address -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3"
 else if test "X$CC" = "Xclang"; then
-  CFLAGS="$CFLAGS -Wall -Wformat -Wformat-security -Werror=format-security -fstack-protector-all -fsanitize=safe-stack -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2"
+  CFLAGS="$CFLAGS -Wextra -Wall -Werror -Wno-unused-parameter -Wno-deprecated-declarations -Wformat -Wformat-security -fstack-protector-all -fsanitize=safe-stack -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2"
 fi; fi
 
 AC_PROG_MAKE_SET
@@ -78,7 +77,7 @@ AC_ARG_ENABLE(gcrypt,
                           is present])
 
 AS_IF([test "x$use_openssl" != "xyes" && test "x$use_tomcrypt" != "xyes" || \
-	test "x$enable_tomcrypt" = "xyes"], [
+	test "x$enable_gcrypt" = "xyes"], [
   AM_PATH_LIBGCRYPT()
 ])
 AS_IF([test "x$LIBGCRYPT_CFLAGS" != "x" -o "x$LIBGCRYPT_LIBS" != "x" ], [

@@ -41,7 +41,8 @@ SCARD_IO_REQUEST pioSendPci;
 
 static LONG find_hb(BYTE *atr, DWORD atrsize, BYTE **hb, LPDWORD hbsize)
 {
-	int i, j, cont;
+	DWORD i;
+	int j, cont;
 	if (atrsize < 2) return SCARD_W_UNSUPPORTED_CARD;
 	switch (atr[0]) {
 	case 0x3B: break;

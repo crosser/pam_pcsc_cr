@@ -35,11 +35,11 @@ freely, subject to the following restrictions:
 #include "pcsc_cr.h"
 
 static struct _auth_chunk
-token_key(const unsigned char *challenge, const int challengesize)
+token_key(const unsigned char *challenge, const size_t challengesize)
 {
 	struct _auth_chunk ho = {0};
 	long rc;
-	int keysize = sizeof(ho.data);
+	size_t keysize = sizeof(ho.data);
 
 	if ((rc = pcsc_cr(challenge, challengesize, ho.data, &keysize))) {
 		ho.err = pcsc_errstr(rc);
@@ -49,7 +49,7 @@ token_key(const unsigned char *challenge, const int challengesize)
 
 static char *mynonce = NULL;
 
-static void update_nonce(char *nonce, const int nonsize)
+static void update_nonce(char *nonce, const size_t nonsize)
 {
 	if (mynonce) {
 		snprintf(nonce, nonsize, "%s", mynonce);
@@ -197,8 +197,8 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	} else if (verbose) {
 		printf("version: %s\n", VERSION);
-		printf("userid : \"%.*s\"\n", ao.datasize, ao.data);
-		printf("payload: \"%.*s\"\n", ao.paylsize, ao.payload);
+		printf("userid : \"%.*s\"\n", (int)ao.datasize, ao.data);
+		printf("payload: \"%.*s\"\n", (int)ao.paylsize, ao.payload);
 	}
 	if (ao.buffer) free(ao.buffer);
 	return 0;
