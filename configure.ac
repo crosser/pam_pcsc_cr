@@ -78,7 +78,11 @@ AC_ARG_ENABLE(gcrypt,
 
 AS_IF([test "x$use_openssl" != "xyes" && test "x$use_tomcrypt" != "xyes" || \
 	test "x$enable_gcrypt" = "xyes"], [
-  AM_PATH_LIBGCRYPT()
+  m4_ifdef([AM_PATH_LIBGCRYPT], [
+    AM_PATH_LIBGCRYPT()
+  ], [
+    m4_exit(1)
+  ])
 ])
 AS_IF([test "x$LIBGCRYPT_CFLAGS" != "x" -o "x$LIBGCRYPT_LIBS" != "x" ], [
   use_gcrypt=yes
